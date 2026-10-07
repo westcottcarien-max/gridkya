@@ -1,0 +1,16 @@
+{
+  "name": "GridKya – Estate Living",
+  "short_name": "GridKya",
+  "description": "Your estate, your neighbours, your home.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FBF5EA",
+  "theme_color": "#FBF5EA",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
