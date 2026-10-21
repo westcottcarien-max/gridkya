@@ -1,0 +1,955 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#080705" />
+<title>GridKya Live Simulator</title>
+<meta name="description" content="Watch six roles run one estate at the same time: managing agent, estate agent, trustee, owner, tenant and contractor." />
+<link rel="icon" type="image/png" href="./icons/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#080705; --panel:#12100b; --panel2:#1a160d; --line:#3a2f14; --text:#f3ead6; --muted:#a99e84;
+  --gold:#d9b25c; --gold2:#f4dc9b; --gold3:#8d6a1f; --glow:rgba(217,178,92,.45);
+  --ok:#7fd1a0;
+  --f-head:'Sora','Segoe UI',system-ui,sans-serif; --f-body:'Manrope','Segoe UI',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);font-family:var(--f-body)}
+body{display:grid;grid-template-rows:auto minmax(0,1fr) auto;height:100vh;overflow:hidden;
+  background:radial-gradient(1100px 600px at 70% -10%,rgba(217,178,92,.10),transparent 60%),var(--bg)}
+button{font:inherit;color:inherit;cursor:pointer}
+.top{display:flex;align-items:center;gap:16px;padding:10px 20px;border-bottom:1px solid var(--line);background:rgba(8,7,5,.85);backdrop-filter:blur(8px);position:sticky;top:0;z-index:20}
+.logo{width:74px;height:74px;flex:none;background:#fff;border-radius:12px;padding:3px;
+  box-shadow:0 0 0 2px var(--gold),0 0 0 4px #000,0 0 22px 3px var(--glow);display:grid;place-items:center;overflow:hidden}
+.logo img{width:100%;height:100%;object-fit:contain}
+.top h1{margin:0;font:700 1.25rem var(--f-head);letter-spacing:.02em}
+.top h1 em{font-style:normal;color:var(--gold)}
+.top p{margin:2px 0 0;color:var(--muted);font-size:.82rem}
+.spacer{flex:1}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:8px 16px;font-weight:700;font-size:.85rem;transition:.15s}
+.btn:hover{border-color:var(--gold);box-shadow:0 0 14px -2px var(--glow)}
+.btn.gold{background:linear-gradient(180deg,var(--gold2),var(--gold) 55%,var(--gold3));color:#1b1405;border-color:var(--gold)}
+.btn.on{border-color:var(--gold);color:var(--gold2)}
+.wrap{display:grid;grid-template-columns:340px minmax(0,1fr);min-height:0}
+.side{border-right:1px solid var(--line);padding:18px;overflow:auto;min-height:0}
+.side h2{font:700 .72rem var(--f-head);letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:4px 0 10px}
+.story{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px;margin-bottom:10px;transition:.15s}
+.story:hover,.story.cur{border-color:var(--gold);box-shadow:0 0 18px -4px var(--glow)}
+.story b{display:block;font:700 .95rem var(--f-head)}
+.story span{display:block;color:var(--muted);font-size:.8rem;margin-top:3px;line-height:1.35}
+.story .dots{display:flex;gap:5px;margin-top:8px}
+.dot{font-size:.65rem;font-weight:800;letter-spacing:.04em;border:1px solid var(--gold3);color:var(--gold2);border-radius:999px;padding:2px 8px;background:#000}
+.chapters{margin:-2px 0 12px 8px;padding-left:14px;border-left:2px solid var(--line)}
+.chapters li{list-style:none;padding:5px 0;font-size:.82rem;color:var(--muted)}
+.chapters li.now{color:var(--gold2);font-weight:800}
+.chapters li.done{color:var(--ok)}
+.chapters li.done::before{content:'✓ '}
+.roles{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:999px;padding:7px 12px;font-size:.82rem;font-weight:700}
+.chip.on{border-color:var(--gold);background:var(--panel2);color:var(--gold2);box-shadow:0 0 12px -3px var(--glow)}
+.hint{color:var(--muted);font-size:.78rem;line-height:1.45;margin:10px 0 0}
+.stagecol{display:flex;flex-direction:column;min-width:0;min-height:0}
+.stage{position:relative;flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:34px;padding:50px 18px 18px;overflow:hidden}
+.device{position:relative;flex:none;transition:filter .3s,opacity .3s}
+.device.dim{filter:saturate(.55) brightness(.6)}
+.dinner{position:absolute;left:0;top:0;transform-origin:0 0}
+.laptop .dinner{width:1320px;height:850px}
+.phone .dinner{width:422px;height:846px}
+.bezel{position:absolute;inset:0;background:#0c0a06;border:2px solid #2b2410;border-radius:22px;box-shadow:0 20px 60px -10px #000,0 0 0 1px #000}
+.phone .bezel{border-radius:54px;border-width:3px}
+.laptop .bezel{height:810px;border-radius:20px 20px 6px 6px}
+.laptop .base{position:absolute;left:-40px;right:-40px;top:808px;height:30px;border-radius:0 0 22px 22px;background:linear-gradient(#262013,#0f0c07);border:2px solid #2b2410;border-top:none}
+.laptop .base::after{content:'';position:absolute;left:50%;top:0;width:160px;height:8px;margin-left:-80px;background:#000;border-radius:0 0 10px 10px}
+.device.active .bezel{border-color:var(--gold);box-shadow:0 20px 60px -10px #000,0 0 0 1px #000,0 0 38px 4px var(--glow)}
+.screen{position:absolute;overflow:hidden;background:#000}
+.laptop .screen{left:20px;top:20px;width:1280px;height:780px;border-radius:6px}
+.phone .screen{left:16px;top:18px;width:390px;height:810px;border-radius:40px}
+.screen iframe{border:0;width:100%;height:100%;background:#000;display:block}
+.tag{position:absolute;left:50%;transform:translateX(-50%);top:-34px;background:linear-gradient(180deg,var(--gold2),var(--gold));color:#1b1405;border-radius:999px;font:800 13px var(--f-body);padding:4px 16px;white-space:nowrap;z-index:5;transition:.25s}
+.device:not(.active) .tag{background:#1d180c;color:var(--gold2);border:1px solid var(--line)}
+.cursor{position:fixed;left:0;top:0;width:34px;height:34px;margin:-17px 0 0 -17px;border-radius:50%;z-index:60;pointer-events:none;
+  background:radial-gradient(circle,rgba(244,220,155,.95) 0 26%,rgba(217,178,92,.35) 27% 60%,transparent 62%);
+  box-shadow:0 0 22px 6px var(--glow);transition:transform .6s cubic-bezier(.4,.1,.2,1),opacity .3s;opacity:0}
+.cursor.show{opacity:1}
+.cursor.tap{animation:tap .45s}
+@keyframes tap{50%{filter:brightness(1.6);scale:.7}}
+.cap{border-top:1px solid var(--line);background:rgba(18,16,11,.9);padding:12px 20px 16px}
+.ctl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ctl .ttl{font:700 .85rem var(--f-head);color:var(--gold2);margin-right:6px}
+.bar{height:3px;background:#2a2312;border-radius:3px;margin:10px 0 12px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold3),var(--gold2));transition:width .4s}
+.line{font:600 clamp(1rem,1.5vw,1.35rem) var(--f-head);line-height:1.35;min-height:2.7em;max-width:1100px}
+.line small{display:block;font:700 .72rem var(--f-body);letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:4px}
+select.btn option{background:#12100b;color:#f3ead6}
+select.btn{color:var(--text);padding:7px 12px;appearance:none;-webkit-appearance:none;background:var(--panel)}
+.welcome{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:24px;z-index:8;pointer-events:none}
+.welcome>div{max-width:560px;background:rgba(8,7,5,.82);border:1px solid var(--line);border-radius:22px;padding:26px 28px;backdrop-filter:blur(6px);pointer-events:auto;box-shadow:0 0 50px -10px var(--glow)}
+.welcome h2{font:700 1.6rem var(--f-head);margin:0 0 8px}
+.welcome h2 em{font-style:normal;color:var(--gold)}
+.welcome p{color:var(--muted);margin:0 0 16px;line-height:1.5}
+.tabs{display:none}
+.foot{padding:8px 20px;text-align:center;font-size:.74rem;color:var(--muted);border-top:1px solid var(--line)}
+.foot a{color:var(--gold)}
+@media (max-width:880px){
+  body{display:flex;flex-direction:column;height:auto;overflow:auto;min-height:100vh}
+  .wrap{display:flex;flex-direction:column;flex:1}
+  .side{border-right:0;border-top:1px solid var(--line);order:2}
+  .stagecol{order:1}
+  .stage{flex:none;height:min(74vh,600px);padding:46px 8px 8px}
+  .top h1{font-size:1rem}
+  #fsBtn{display:none}
+  .top .btn{padding:6px 10px;font-size:.78rem}
+  .top{padding:8px 12px;gap:10px;position:static}
+  .logo{width:56px;height:56px}
+  .top p{display:none}
+  .btn{padding:7px 12px}
+  .tabs{display:flex;gap:8px;padding:8px 12px 0;overflow:auto}
+  .cap{padding:10px 14px 14px}
+}
+@media (prefers-reduced-motion:reduce){.cursor{transition:none}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="logo"><img src="./brand/gridkya-logo-full.png" alt="GridKya – Simplifying Smart Community Living" /></div>
+  <div><h1>GridKya <em>Live Simulator</em></h1><p>Six roles. One estate. Everything one person does appears for everyone, instantly.</p></div>
+  <div class="spacer"></div>
+  <button class="btn" id="voiceBtn" title="Spoken commentary">Voice: off</button>
+  <button class="btn" id="resetBtn" title="Put the demo estate back to its starting point">Reset demo</button>
+  <button class="btn" id="fsBtn">Full screen</button>
+</header>
+
+<div class="wrap">
+  <aside class="side" id="side">
+    <h2>Guided stories</h2>
+    <div id="stories"></div>
+    <h2 style="margin-top:20px">Explore it yourself</h2>
+    <div class="roles" id="roleChips"></div>
+    <p class="hint">Tap the roles you want on screen, then use the real app inside each device. Whatever one person does, the others see it straight away. “Reset demo” brings back the starting data.</p>
+  </aside>
+
+  <section class="stagecol">
+    <div class="tabs" id="tabs"></div>
+    <div class="stage" id="stage">
+      <div class="welcome" id="welcome"><div>
+        <h2>See <em>every role</em> at work</h2>
+        <p>Pick a guided story on the left and watch a tenant, a managing agent, a contractor and the trustees run a complex together, or tap the roles and use the app yourself.</p>
+        <button class="btn gold" id="startFirst">Start with “Meet the six capacities”</button>
+      </div></div>
+    </div>
+    <div class="cap">
+      <div class="ctl">
+        <span class="ttl" id="cTitle">Ready</span>
+        <button class="btn" id="pauseBtn" disabled>Pause</button>
+        <button class="btn" id="restartBtn" disabled>Restart</button>
+        <button class="btn" id="stopBtn" disabled>Stop</button>
+        <select class="btn" id="speed" aria-label="Speed"><option value="0.8">Slower</option><option value="1" selected>Normal</option><option value="1.5">Faster</option><option value="2.5">Very fast</option></select>
+      </div>
+      <div class="bar"><i id="prog"></i></div>
+      <div class="line" id="line"><small>Tip</small>Press a story to begin. The screens are the real GridKya app with demo people and demo money.</div>
+    </div>
+  </section>
+</div>
+<div class="foot">GridKya · Manage · Monitor · Maintain · Designed by <a href="https://www.drecar.co.za" target="_blank" rel="noreferrer">dréCAR Software Developers</a> · Demo data only</div>
+<div class="cursor" id="cursor"></div>
+
+<script>
+'use strict';
+/* ───────────────────────── the roles ───────────────────────── */
+const ROLES = {
+  agent:      { label: 'Managing Agent', who: 'Pieter',  kind: 'laptop' },
+  estate:     { label: 'Estate Agent',   who: 'Naledi',  kind: 'laptop' },
+  trustee:    { label: 'Trustee',        who: 'Ravi',    kind: 'laptop' },
+  owner:      { label: 'Owner',          who: 'Lindiwe', kind: 'phone' },
+  tenant:     { label: 'Tenant',         who: 'Thandi',  kind: 'phone' },
+  contractor: { label: 'Contractor',     who: 'Sizwe',   kind: 'phone' },
+};
+const $ = (s) => document.querySelector(s);
+const delay = (ms) => new Promise((r) => setTimeout(r, ms));
+const isSmall = () => window.matchMedia('(max-width:880px)').matches;
+
+/* ───────────────────────── devices ───────────────────────── */
+let devices = []; // { id, role, kind, el, frame, tag }
+let seq = 0;
+
+function frameUrl(role) {
+  return `./index.html?nosplash&sim=${Date.now()}${seq++}#${role}`;
+}
+function makeFrame(role) {
+  const f = document.createElement('iframe');
+  f.name = `sim-${role}`;
+  f.title = `${ROLES[role].label} – ${ROLES[role].who}`;
+  f.setAttribute('allow', 'clipboard-write');
+  f.src = frameUrl(role);
+  return f;
+}
+function buildDevice(spec) {
+  const kind = spec.kind || ROLES[spec.role].kind;
+  const el = document.createElement('div');
+  el.className = `device ${kind}`;
+  el.innerHTML = `<div class="tag"></div><div class="dinner"><div class="bezel"></div>${kind === 'laptop' ? '<div class="base"></div>' : ''}<div class="screen"></div></div>`;
+  const d = { id: spec.id, role: spec.role, kind, baseKind: kind, el, frame: null, tag: el.querySelector('.tag') };
+  attachFrame(d);
+  return d;
+}
+function attachFrame(d) {
+  const old = d.frame;
+  d.frame = makeFrame(d.role);
+  const screen = d.el.querySelector('.screen');
+  if (old) old.remove();
+  screen.appendChild(d.frame);
+  d.tag.textContent = `${ROLES[d.role].label} · ${ROLES[d.role].who}`;
+}
+function setDevices(specs) {
+  const next = specs.map((sp) => devices.find((d) => d.id === sp.id && d.role === sp.role) || buildDevice(sp));
+  devices.forEach((d) => { if (!next.includes(d)) d.el.remove(); });
+  devices = next;
+  devices.forEach((d) => $('#stage').appendChild(d.el));
+  layout();
+  renderTabs();
+}
+const dev = (id) => devices.find((d) => d.id === id);
+
+function swapRole(id, role) {
+  const d = dev(id);
+  if (!d || d.role === role) return;
+  d.role = role;
+  attachFrame(d);
+  layout();
+}
+
+function layout() {
+  const stage = $('#stage');
+  const W = stage.clientWidth - 36, H = stage.clientHeight - 80;
+  const shown = isSmall() ? devices.filter((d) => d === (devices.find((x) => x.el.classList.contains('active')) || devices[0])) : devices;
+  devices.forEach((d) => { d.el.style.display = shown.includes(d) ? '' : 'none'; });
+  if (!shown.length) return;
+  devices.forEach((d) => { d.kind = isSmall() ? 'phone' : d.baseKind; d.el.className = `device ${d.kind}${d.el.classList.contains('active') ? ' active' : ''}${d.el.classList.contains('dim') ? ' dim' : ''}`; });
+  const nat = (d) => (d.kind === 'laptop' ? { w: 1320, h: 850 } : { w: 422, h: 846 });
+  const gap = 34;
+  const totalW = shown.reduce((a, d) => a + nat(d).w, 0) + gap * (shown.length - 1);
+  const maxH = Math.max(...shown.map((d) => nat(d).h));
+  const s = Math.min(W / totalW, H / maxH, 1);
+  shown.forEach((d) => {
+    const n = nat(d);
+    d.el.style.width = n.w * s + 'px';
+    d.el.style.height = n.h * s + 'px';
+    d.el.querySelector('.dinner').style.transform = `scale(${s})`;
+  });
+}
+window.addEventListener('resize', layout);
+
+function focusDevice(id) {
+  const d = dev(id);
+  devices.forEach((x) => { x.el.classList.toggle('active', x === d); x.el.classList.toggle('dim', !!d && x !== d && story != null); });
+  if (isSmall()) layout();
+  renderTabs();
+}
+function renderTabs() {
+  const t = $('#tabs');
+  t.innerHTML = '';
+  if (devices.length < 2) return;
+  devices.forEach((d) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (d.el.classList.contains('active') || (!devices.some((x) => x.el.classList.contains('active')) && d === devices[0]) ? ' on' : '');
+    b.textContent = `${ROLES[d.role].label}`;
+    b.onclick = () => { devices.forEach((x) => x.el.classList.toggle('active', x === d)); layout(); renderTabs(); };
+    t.appendChild(b);
+  });
+}
+
+/* ───────────────────────── run control ───────────────────────── */
+class Abort extends Error {}
+const run = { token: 0, paused: false, speed: 1 };
+let story = null;
+let voiceOn = false;
+
+async function sleep(ms) {
+  const tok = run.token;
+  let left = ms / run.speed;
+  while (left > 0) {
+    if (run.token !== tok) throw new Abort();
+    await delay(40);
+    if (!run.paused) left -= 40;
+  }
+  if (run.token !== tok) throw new Abort();
+}
+async function waitFor(fn, timeout = 7000) {
+  const tok = run.token;
+  const t0 = performance.now();
+  for (;;) {
+    if (run.token !== tok) throw new Abort();
+    const v = fn();
+    if (v) return v;
+    if (performance.now() - t0 > timeout) return null;
+    await delay(120);
+  }
+}
+
+/* ───────────────────────── talking ───────────────────────── */
+function speak(text) {
+  if (!voiceOn || !('speechSynthesis' in window)) return Promise.resolve();
+  return new Promise((res) => {
+    const u = new SpeechSynthesisUtterance(text);
+    const vs = speechSynthesis.getVoices();
+    const v = vs.find((x) => /en-GB/i.test(x.lang) && /male|george|daniel|ryan/i.test(x.name)) || vs.find((x) => /en-(GB|ZA)/i.test(x.lang)) || vs.find((x) => /^en/i.test(x.lang));
+    if (v) u.voice = v;
+    u.rate = 0.98 * Math.min(run.speed, 1.6);
+    u.onend = u.onerror = () => res();
+    speechSynthesis.speak(u);
+  });
+}
+async function say(id, text) {
+  if (id) focusDevice(id);
+  const who = id && dev(id) ? `${ROLES[dev(id).role].label} · ${ROLES[dev(id).role].who}` : 'GridKya';
+  $('#line').innerHTML = `<small></small><span></span>`;
+  $('#line small').textContent = who;
+  $('#line span').textContent = text;
+  const talk = speak(text);
+  await sleep(Math.max(1500, text.length * 48));
+  if (voiceOn) await Promise.race([talk, delay(9000)]);
+}
+
+/* ───────────────────────── driving the real app ───────────────────────── */
+const cursor = $('#cursor');
+const SELECTABLE = 'button,a,[role=tab],[role=radio],[role=button],summary,.row-link,.tile,.slot,.capacity-tile,label.check';
+const norm = (s) => (s || '').replace(/\s+/g, ' ').trim();
+const visible = (el) => el && el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+const missing = [];
+
+function matcher(m) {
+  if (m instanceof RegExp) return { css: SELECTABLE, test: (t) => m.test(t) };
+  if (typeof m === 'string') return { css: SELECTABLE, test: (t) => t.toLowerCase() === m.toLowerCase() };
+  return { css: m.css || SELECTABLE, test: m.text instanceof RegExp ? (t) => m.text.test(t) : m.text ? (t) => t.toLowerCase() === m.text.toLowerCase() : () => true, nth: m.nth || 0 };
+}
+function lookup(d, m) {
+  const doc = d.frame.contentDocument;
+  if (!doc) return null;
+  const mm = matcher(m);
+  const modals = doc.querySelectorAll('.modal');
+  const roots = modals.length ? [modals[modals.length - 1], doc] : [doc];
+  for (const root of roots) {
+    const hits = [...root.querySelectorAll(mm.css)].filter((el) => visible(el) && mm.test(norm(el.textContent)));
+    if (hits.length) return hits[mm.nth || 0] || null;
+  }
+  return null;
+}
+function fieldOf(d, label) {
+  const doc = d.frame.contentDocument;
+  if (!doc) return null;
+  const re = label instanceof RegExp ? label : null;
+  const modals = doc.querySelectorAll('.modal');
+  const roots = modals.length ? [modals[modals.length - 1], doc] : [doc];
+  for (const root of roots) {
+    for (const f of root.querySelectorAll('label.field')) {
+      const t = norm(f.querySelector('.field-label')?.textContent);
+      if (re ? re.test(t) : t.toLowerCase() === label.toLowerCase()) {
+        const c = f.querySelector('input,select,textarea');
+        if (c && visible(c)) return c;
+      }
+    }
+  }
+  return null;
+}
+
+async function pointAt(d, el) {
+  el.scrollIntoView({ block: 'center', inline: 'nearest' });
+  await sleep(250);
+  const r = el.getBoundingClientRect();
+  const fr = d.frame.getBoundingClientRect();
+  const sc = fr.width / d.frame.clientWidth;
+  const x = fr.left + (r.left + Math.min(r.width / 2, 120)) * sc;
+  const y = fr.top + (r.top + r.height / 2) * sc;
+  cursor.classList.add('show');
+  cursor.style.transform = `translate(${x}px,${y}px)`;
+  await sleep(700);
+}
+async function tapFx() {
+  cursor.classList.remove('tap');
+  void cursor.offsetWidth;
+  cursor.classList.add('tap');
+  await sleep(250);
+}
+const note = (what) => { missing.push(what); console.warn('[simulator] not found:', what); };
+
+function api(id) {
+  const d = () => dev(id);
+  const win = () => d().frame.contentWindow;
+  const o = {
+    async go(route) {
+      focusDevice(id);
+      win().location.hash = '#/' + route;
+      await sleep(1100);
+    },
+    async click(m, opts = {}) {
+      focusDevice(id);
+      const el = await waitFor(() => lookup(d(), m), opts.timeout || 7000);
+      if (!el) return note(String(m.text || m.css || m));
+      await pointAt(d(), el);
+      await tapFx();
+      el.click();
+      if (opts.twice) { await sleep(450); (lookup(d(), m) || el).click(); }
+      await sleep(opts.after ?? 800);
+    },
+    async fill(label, text) {
+      focusDevice(id);
+      const el = await waitFor(() => fieldOf(d(), label));
+      if (!el) return note(String(label));
+      await pointAt(d(), el);
+      await tapFx();
+      el.focus();
+      const W = win();
+      const proto = el.tagName === 'TEXTAREA' ? W.HTMLTextAreaElement.prototype : W.HTMLInputElement.prototype;
+      const set = Object.getOwnPropertyDescriptor(proto, 'value').set;
+      let cur = '';
+      for (const ch of text) {
+        cur += ch;
+        set.call(el, cur);
+        el.dispatchEvent(new W.Event('input', { bubbles: true }));
+        await sleep(32);
+      }
+      await sleep(250);
+    },
+    async choose(label, option) {
+      focusDevice(id);
+      const el = await waitFor(() => fieldOf(d(), label));
+      if (!el) return note(String(label));
+      await pointAt(d(), el);
+      await tapFx();
+      const opt = [...el.options].find((x) => (option instanceof RegExp ? option.test(x.text) || option.test(x.value) : norm(x.text).toLowerCase() === option.toLowerCase()));
+      if (!opt) return note(`option ${option}`);
+      const set = Object.getOwnPropertyDescriptor(win().HTMLSelectElement.prototype, 'value').set;
+      set.call(el, opt.value);
+      el.dispatchEvent(new (win().Event)('change', { bubbles: true }));
+      await sleep(500);
+    },
+    async tick(css, filter = () => true) {
+      focusDevice(id);
+      await waitFor(() => d().frame.contentDocument.querySelector(css));
+      const boxes = [...d().frame.contentDocument.querySelectorAll(css)].filter(filter);
+      for (const b of boxes) {
+        if (b.checked) continue;
+        await pointAt(d(), b);
+        b.click();
+        await sleep(180);
+      }
+    },
+    async hold(css, ms) {
+      focusDevice(id);
+      const el = await waitFor(() => { const e = d().frame.contentDocument.querySelector(css); return visible(e) ? e : null; });
+      if (!el) return note(css);
+      await pointAt(d(), el);
+      const W = win();
+      el.dispatchEvent(new W.PointerEvent('pointerdown', { bubbles: true, pointerId: 1, pointerType: 'touch' }));
+      cursor.classList.add('tap');
+      await sleep(ms * run.speed);
+      el.dispatchEvent(new W.PointerEvent('pointerup', { bubbles: true, pointerId: 1, pointerType: 'touch' }));
+      await sleep(500);
+    },
+    async photo() {
+      const doc = d().frame.contentDocument;
+      const inp = await waitFor(() => doc.querySelector('input[type=file][accept="image/*"]'));
+      if (!inp) return note('photo input');
+      const c = document.createElement('canvas');
+      c.width = 640; c.height = 420;
+      const g = c.getContext('2d');
+      const grd = g.createLinearGradient(0, 0, 640, 420);
+      grd.addColorStop(0, '#2b2410'); grd.addColorStop(1, '#8d6a1f');
+      g.fillStyle = grd; g.fillRect(0, 0, 640, 420);
+      g.fillStyle = '#f4dc9b'; g.font = '700 38px sans-serif'; g.fillText('Work completed', 150, 215);
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+      const W = win();
+      const dt = new W.DataTransfer();
+      dt.items.add(new W.File([blob], 'completed.png', { type: 'image/png' }));
+      inp.files = dt.files;
+      inp.dispatchEvent(new W.Event('change', { bubbles: true }));
+      await sleep(900);
+    },
+    async esc() {
+      const doc = d().frame.contentDocument;
+      doc.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
+      await sleep(500);
+    },
+    swap(role) { swapRole(id, role); return sleep(2200); },
+  };
+  return o;
+}
+const A = (id) => api(id);
+const sayAs = say;
+const storeGet = (key) => { try { return JSON.parse(localStorage.getItem('gridkya:v1:' + key) || '[]'); } catch { return []; } };
+
+/* ───────────────────────── the stories ───────────────────────── */
+const STORIES = [
+  {
+    id: 'meet', title: 'Meet the six capacities', blurb: 'One sign-in, six front doors. A quick tour of what each person sees.',
+    devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'tenant' }],
+    chapters: [
+      ['Managing Agent', async () => {
+        const lap = A('lap');
+        await say('lap', 'The managing agent runs a whole portfolio. After signing in, every complex appears with its own picture and name.');
+        await lap.go('agent/complexes');
+        await sleep(1200);
+        await lap.click(/Acacia Gardens/);
+        await say('lap', 'One tap opens the complex. Finance, administration, maintenance, security and rules, each a big, plainly worded tile.');
+        await lap.go('g/financial');
+        await sleep(900);
+      }],
+      ['Estate Agent', async () => {
+        await A('lap').swap('estate');
+        await say('lap', 'The estate agent works from the estate office: the gate, visitors, alarms, residents and the daily running of the complex.');
+        await A('lap').go('g/security');
+        await sleep(900);
+      }],
+      ['Trustee', async () => {
+        await A('lap').swap('trustee');
+        await say('lap', 'A trustee sees the money, the maintenance and every decision on one dashboard, and can audit the managing agent.');
+        await sleep(900);
+      }],
+      ['Owner', async () => {
+        await A('ph').swap('owner');
+        await say('ph', 'An owner sees their own unit: levies, statements, debit order, and the tenant renting the unit.');
+        await A('ph').go('g/financial');
+        await sleep(900);
+      }],
+      ['Tenant', async () => {
+        await A('ph').swap('tenant');
+        await say('ph', 'A tenant sees rent, gate codes for visitors, facility bookings and a simple way to report a repair.');
+        await A('ph').go('g/facilities');
+        await sleep(900);
+      }],
+      ['Contractor', async () => {
+        await A('ph').swap('contractor');
+        await say('ph', 'Contractors get a portal of their own: jobs, quotes, invoices and payment dates, and nothing else.');
+        await A('ph').go('contractor/jobs');
+        await sleep(1200);
+        await say(null, 'Six capacities, one estate. Next, watch them work together in the other stories.');
+      }],
+    ],
+  },
+  {
+    id: 'leak', title: 'A leak, from report to payment', blurb: 'Tenant reports it, the agent approves the work, the contractor fixes it and gets paid.',
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'agent' }, { id: 'ct', role: 'contractor' }],
+    reset: true,
+    chapters: [
+      ['Tenant reports it', async () => {
+        const ph = A('ph');
+        await say('ph', 'Saturday evening. Thandi, a tenant, notices water dripping from her bathroom ceiling.');
+        await ph.go('maintenance/report');
+        await ph.fill('What’s wrong?', 'Water dripping from the bathroom ceiling');
+        await ph.choose('How urgent?', 'Urgent');
+        await ph.fill('Tell us more', 'Started an hour ago and it is getting faster.');
+        await say('ph', 'GridKya Assist reads the description and suggests the right category and urgency.');
+        await ph.click('Send report');
+        await sleep(800);
+      }],
+      ['Agent sees it instantly', async () => {
+        const lap = A('lap');
+        await lap.go('maintenance');
+        await say('lap', 'The moment it is sent, the report is on the managing agent’s job board. No phone calls, no WhatsApp group.');
+        await lap.click(/Water dripping/);
+        await say('lap', 'Unit, urgency, photos and history are all attached.');
+      }],
+      ['Quote becomes a purchase order', async () => {
+        const lap = A('lap');
+        await lap.go('maintenance/tkt_2');
+        await say('lap', 'Meanwhile, quotes for a broken pool gate have arrived. The agent compares them side by side and accepts one.');
+        await lap.click('Accept');
+        await say('lap', 'Accepting a quote issues the purchase order automatically.');
+      }],
+      ['Contractor does the work', async () => {
+        const ct = A('ct');
+        await ct.go('contractor/jobs/tkt_1');
+        await say('ct', 'The plumber sees only his own jobs on his phone. He starts the work…');
+        await ct.click(/I’ve started/);
+        await say('ct', '…uploads a photo as proof, adds a note and marks the job complete.');
+        await ct.photo();
+        await ct.fill('Note for the estate', 'Valve replaced and tested for 30 minutes. No leaks.');
+        await ct.click('Mark complete');
+      }],
+      ['Tenant signs it off', async () => {
+        const ph = A('ph');
+        await ph.go('maintenance/tkt_1');
+        await say('ph', 'Thandi is asked to confirm the repair. Nothing is closed until the resident says it is fixed.');
+        await ph.click(/Confirm it’s fixed/);
+        await sleep(600);
+      }],
+      ['Invoice and payment', async () => {
+        const ct = A('ct'), lap = A('lap');
+        await ct.go('contractor/jobs/tkt_1');
+        await say('ct', 'The contractor sends his invoice from the same job.');
+        await ct.fill('Invoice number', 'AF-7781');
+        await ct.fill(/Amount incl\. VAT/, '4850');
+        await ct.click('Send invoice');
+        await lap.go('finance/payables');
+        await say('lap', 'It lands in the agent’s payables. Approve, tick, and release the EFT batch. The books update on their own.');
+        await lap.click('Approve', { timeout: 2500 });
+        await lap.click('Approve', { timeout: 1500 });
+        await lap.tick('input.pick');
+        await lap.click(/Release EFT batch/, { twice: true });
+        await say(null, 'From a dripping ceiling to a paid invoice in minutes, with a full record at every step.');
+      }],
+    ],
+  },
+  {
+    id: 'visitor', title: 'A visitor at the gate', blurb: 'The tenant creates a one-time code; security checks it and the gate opens.',
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'estate' }],
+    reset: true,
+    chapters: [
+      ['Tenant creates a code', async () => {
+        const ph = A('ph');
+        await say('ph', 'Thandi’s mother is coming for lunch. Instead of phoning the guardhouse, Thandi creates a visitor code.');
+        await ph.go('security/visitors');
+        await ph.click('New visitor code');
+        await ph.fill('Visitor’s name', 'Mom');
+        await ph.fill('Vehicle registration (optional)', 'CA 456-789');
+        await ph.click('Create code');
+        await say('ph', 'A one-time code and QR are ready to share by message.');
+      }],
+      ['Security sees who is expected', async () => {
+        const lap = A('lap');
+        await lap.go('security/visitors');
+        await say('lap', 'At the estate office the visitor is already on the expected list.');
+      }],
+      ['Guard checks the code', async () => {
+        const lap = A('lap');
+        const code = (storeGet('security.visitors')[0] || {}).code || '';
+        await lap.go('security/gate');
+        await say('lap', 'The visitor arrives. The guard types the code or scans the QR.');
+        await lap.fill(/Visitor code/, code);
+        await lap.click(/Check & open gate/);
+        await say('lap', 'Valid. The gate opens and the entry is logged with date, time and vehicle.');
+        await lap.go('security/logs');
+        await say('lap', 'Every entry and exit stays on record.');
+      }],
+    ],
+  },
+  {
+    id: 'panic', title: 'Panic button', blurb: 'A resident presses and holds; the guardhouse knows the unit instantly.',
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'estate' }],
+    reset: true,
+    chapters: [
+      ['Resident calls for help', async () => {
+        const ph = A('ph'), lap = A('lap');
+        await lap.go('security/panic');
+        await say('lap', 'The guardhouse watches the alert desk. All calm.');
+        await ph.go('security/panic');
+        await say('ph', 'Late at night, Thandi hears someone at her door. She presses and holds the panic button for two seconds.');
+        await ph.hold('.panic-btn', 2300);
+      }],
+      ['Security responds', async () => {
+        const lap = A('lap');
+        await say('lap', 'The alert appears at once, with the resident’s unit, name and phone number.');
+        await lap.click(/I’m responding/);
+        await say('ph', 'Thandi’s screen updates: help is on the way.');
+        await sleep(1500);
+      }],
+      ['Resolved on record', async () => {
+        const lap = A('lap');
+        await lap.click('Resolve');
+        await say('lap', 'Resolved, and kept on record for the incident report.');
+      }],
+    ],
+  },
+  {
+    id: 'levy', title: 'Levies, rent and arrears', blurb: 'The owner loads a tenant’s arrears; the agent sees collections.',
+    devices: [{ id: 'ph', role: 'owner' }, { id: 'ph2', role: 'tenant' }, { id: 'lap', role: 'agent' }],
+    reset: true,
+    chapters: [
+      ['Owner loads tenant arrears', async () => {
+        const ph = A('ph');
+        await ph.go('payments/tenant-arrears');
+        await say('ph', 'Lindiwe owns a unit that Thandi rents. When rent falls behind, the owner can load the tenant’s arrears.');
+        await ph.click('Load arrears');
+        await ph.fill('Amount (R)', '9800');
+        await ph.click('Load arrears');
+        await sleep(700);
+      }],
+      ['Tenant sees what is owed', async () => {
+        const t = A('ph2');
+        await t.go('payments/rent');
+        await say('ph2', 'Thandi sees exactly what she owes and can pay securely in the app.');
+      }],
+      ['Owner pays the levy', async () => {
+        const ph = A('ph');
+        await ph.go('payments/levies');
+        await say('ph', 'The owner also pays the monthly levy in a few taps.');
+        await ph.click('Pay now');
+        await sleep(2200);
+        await ph.esc();
+      }],
+      ['Agent sees collections', async () => {
+        const lap = A('lap');
+        await lap.go('finance/collections');
+        await say('lap', 'The managing agent sees levies, arrears and collection progress for the whole complex.');
+      }],
+    ],
+  },
+  {
+    id: 'meeting', title: 'Meetings and voting', blurb: 'The agent issues a meeting notice; the trustee votes from his phone.',
+    devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'trustee', kind: 'phone' }],
+    reset: true,
+    chapters: [
+      ['Notice goes out', async () => {
+        const lap = A('lap');
+        await lap.go('governance/meetings/mt_tr2');
+        await say('lap', 'The agent opens the trustees’ meeting. One tap generates the formal notice, with the agenda and quorum rules.');
+        await lap.click(/Generate notice/);
+        await lap.click(/Send to trustees/);
+        await say('lap', 'Sent to every trustee, and recorded.');
+      }],
+      ['Trustee votes', async () => {
+        const ph = A('ph');
+        await ph.go('governance/resolutions');
+        await say('ph', 'Ravi, a trustee, votes on a resolution straight from his phone, without waiting for the meeting.');
+        await ph.click({ css: 'button', text: 'For' });
+        await say('ph', 'The vote is counted, and every decision stays on the record.');
+      }],
+    ],
+  },
+  {
+    id: 'notice', title: 'A notice to the whole estate', blurb: 'One notice reaches every resident in the app, by SMS and by email.',
+    devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'tenant' }],
+    reset: true,
+    chapters: [
+      ['Agent writes the notice', async () => {
+        const lap = A('lap');
+        await lap.go('communication/broadcast');
+        await say('lap', 'Water will be off on Thursday. The agent starts from a ready-made template instead of a blank page.');
+        await lap.choose('Start from a template', /water/i);
+        await sleep(700);
+        await say('lap', 'Choose who receives it, and send. One notice reaches the app, SMS and email.');
+        await lap.click(/^Send to/);
+      }],
+      ['Residents receive it', async () => {
+        const ph = A('ph');
+        await ph.go('communication/announcements');
+        await say('ph', 'Every resident sees the notice at once. No scrolling through forty unread messages in a WhatsApp group.');
+      }],
+    ],
+  },
+  {
+    id: 'watchdog', title: 'The Utility Watchdog', blurb: 'An owner checks an electricity bill against their own meter and the tariff.',
+    devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
+    reset: true,
+    chapters: [
+      ['Owner checks the bill', async () => {
+        const ph = A('ph');
+        await ph.go('watchdog/check');
+        await say('ph', 'Lindiwe suspects her electricity bill is too high. She enters what she was billed and her own meter readings.');
+        await ph.fill(/Units billed/, '520');
+        await ph.fill(/Total amount billed/, '2150');
+        await ph.fill(/Opening reading/, '18652');
+        await ph.fill(/Closing reading/, '19041');
+        await ph.click(/Run my Fair Metering check/);
+        await sleep(800);
+        await say('ph', 'GridKya compares the bill with her meter and the official municipal tariff, and shows the difference in rands.');
+      }],
+      ['Agent sees utilities', async () => {
+        const lap = A('lap');
+        await lap.go('finance/utilities');
+        await say('lap', 'The managing agent monitors utilities for the whole complex, and gets a flag when something looks wrong.');
+      }],
+    ],
+  },
+  {
+    id: 'oversight', title: 'Trustee oversight', blurb: 'The trustee dashboard and a 20-point audit of the managing agent.',
+    devices: [{ id: 'lap', role: 'trustee' }],
+    reset: true,
+    chapters: [
+      ['The dashboard', async () => {
+        const lap = A('lap');
+        await lap.go('management');
+        await say('lap', 'Trustees see the money, the maintenance and the decisions on a single page, and a monthly report that writes itself.');
+      }],
+      ['Audit the agent', async () => {
+        const lap = A('lap');
+        await lap.go('management/performance');
+        await say('lap', 'Twenty points to check whether the managing agent is doing the job: financial control, maintenance, communication and compliance.');
+        await lap.tick('.audit-check input', (b, i) => true);
+        await say('lap', 'A score, and the gaps to raise at the next meeting.');
+      }],
+    ],
+  },
+];
+
+/* ───────────────────────── page wiring ───────────────────────── */
+function renderStories() {
+  const box = $('#stories');
+  box.innerHTML = '';
+  STORIES.forEach((s) => {
+    const b = document.createElement('button');
+    b.className = 'story' + (story === s ? ' cur' : '');
+    b.dataset.id = s.id;
+    const roles = [...new Set(s.devices.map((d) => ROLES[d.role].label))];
+    b.innerHTML = `<b></b><span></span><div class="dots">${roles.map((r) => `<i class="dot">${r}</i>`).join('')}</div>`;
+    b.querySelector('b').textContent = s.title;
+    b.querySelector('span').textContent = s.blurb;
+    b.onclick = () => play(s);
+    box.appendChild(b);
+    if (story === s) {
+      const ol = document.createElement('ol');
+      ol.className = 'chapters';
+      ol.id = 'chapters';
+      s.chapters.forEach(([name], i) => { const li = document.createElement('li'); li.textContent = name; li.dataset.i = i; ol.appendChild(li); });
+      box.appendChild(ol);
+    }
+  });
+}
+function renderChips() {
+  const box = $('#roleChips');
+  box.innerHTML = '';
+  Object.entries(ROLES).forEach(([id, r]) => {
+    const b = document.createElement('button');
+    b.className = 'chip' + (!story && devices.some((d) => d.role === id) ? ' on' : '');
+    b.textContent = r.label;
+    b.onclick = () => explore(id);
+    box.appendChild(b);
+  });
+}
+function mark(i) {
+  document.querySelectorAll('#chapters li').forEach((li) => {
+    const n = +li.dataset.i;
+    li.className = n < i ? 'done' : n === i ? 'now' : '';
+  });
+  $('#prog').style.width = story ? `${(i / story.chapters.length) * 100}%` : '0';
+}
+function setButtons(playing) {
+  $('#pauseBtn').disabled = !playing;
+  $('#restartBtn').disabled = !story;
+  $('#stopBtn').disabled = !story;
+}
+
+function resetData() {
+  try {
+    Object.keys(localStorage).filter((k) => k.startsWith('gridkya:v1:')).forEach((k) => localStorage.removeItem(k));
+  } catch (e) { /* ignore */ }
+}
+async function resetDemo() {
+  devices.forEach((d) => d.frame.remove());
+  resetData();
+  await delay(150);
+  devices.forEach((d) => attachFrame(d));
+  layout();
+}
+
+async function play(s) {
+  run.token++;
+  const tok = run.token;
+  window.speechSynthesis?.cancel();
+  run.paused = false;
+  $('#pauseBtn').textContent = 'Pause';
+  $('#welcome').style.display = 'none';
+  story = s;
+  $('#cTitle').textContent = s.title;
+  renderStories(); renderChips();
+  devices.forEach((d) => d.frame.remove());
+  if (s.reset) resetData();
+  setDevices(s.devices);
+  devices.forEach((d) => { d.el.classList.remove('active', 'dim'); attachFrame(d); });
+  layout();
+  setButtons(true);
+  mark(0);
+  cursor.classList.remove('show');
+  try {
+    await delay(300);
+    focusDevice(s.devices[0].id);
+    $('#line').innerHTML = '<small>GridKya</small>Loading the demo estate…';
+    await sleep(2200);
+    for (let i = 0; i < s.chapters.length; i++) {
+      mark(i);
+      $('#cTitle').textContent = `${s.title} · ${i + 1}/${s.chapters.length}: ${s.chapters[i][0]}`;
+      await s.chapters[i][1]();
+      if (run.token !== tok) return;
+    }
+    mark(s.chapters.length);
+    $('#cTitle').textContent = `${s.title} · finished`;
+    cursor.classList.remove('show');
+    setButtons(false);
+    $('#pauseBtn').disabled = true;
+    await say(null, 'That was the story. Pick another, replay it, or use the app yourself.');
+  } catch (e) {
+    if (!(e instanceof Abort)) { console.error(e); $('#line').textContent = 'Something went wrong. Press Reset demo and try again.'; }
+  }
+}
+function stop() {
+  run.token++;
+  window.speechSynthesis?.cancel();
+  cursor.classList.remove('show');
+  story = null;
+  devices.forEach((d) => d.el.classList.remove('dim'));
+  $('#cTitle').textContent = 'Explore';
+  $('#prog').style.width = '0';
+  setButtons(false);
+  renderStories(); renderChips();
+}
+function explore(role) {
+  if (story) stop();
+  $('#welcome').style.display = 'none';
+  const have = devices.map((d) => ({ id: d.id, role: d.role }));
+  const idx = have.findIndex((d) => d.role === role);
+  let next;
+  if (idx >= 0) next = have.filter((_, i) => i !== idx);
+  else next = [...have, { id: role, role }];
+  const max = isSmall() ? 3 : 3;
+  if (next.length > max) next = next.slice(next.length - max);
+  if (!next.length) next = [{ id: role, role }];
+  next = next.map((n) => ({ id: n.id || n.role, role: n.role }));
+  setDevices(next);
+  focusDevice(next[next.length - 1].id);
+  $('#line').innerHTML = '<small>Explore</small>Use the app on each device. Whatever one person does, the others see straight away.';
+  renderChips();
+}
+
+$('#pauseBtn').onclick = () => {
+  run.paused = !run.paused;
+  $('#pauseBtn').textContent = run.paused ? 'Resume' : 'Pause';
+  if ('speechSynthesis' in window) run.paused ? speechSynthesis.pause() : speechSynthesis.resume();
+};
+$('#restartBtn').onclick = () => story && play(story);
+$('#stopBtn').onclick = () => { stop(); explore(devices[0]?.role || 'tenant'); };
+$('#speed').onchange = (e) => { run.speed = +e.target.value; };
+$('#voiceBtn').onclick = () => {
+  voiceOn = !voiceOn;
+  $('#voiceBtn').textContent = `Voice: ${voiceOn ? 'on' : 'off'}`;
+  $('#voiceBtn').classList.toggle('on', voiceOn);
+  if (!voiceOn) window.speechSynthesis?.cancel();
+};
+$('#resetBtn').onclick = async () => {
+  const was = story;
+  run.token++;
+  window.speechSynthesis?.cancel();
+  cursor.classList.remove('show');
+  story = null;
+  await resetDemo();
+  setButtons(false);
+  renderStories(); renderChips();
+  $('#cTitle').textContent = 'Demo reset';
+  $('#line').innerHTML = '<small>Reset</small>The demo estate is back to its starting point.' + (was ? ' Press the story again to replay it.' : '');
+};
+$('#fsBtn').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+};
+document.addEventListener('keydown', (e) => {
+  if (e.key === ' ' && story && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(e.target.tagName)) { e.preventDefault(); $('#pauseBtn').click(); }
+});
+$('#startFirst').onclick = () => play(STORIES[0]);
+
+window.__sim = { play, stories: STORIES, missing, run, dev: (id) => dev(id), stop, explore };
+
+/* start with the two most common devices on screen so the page is never empty */
+setDevices([{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'tenant' }]);
+focusDevice('lap');
+renderStories();
+renderChips();
+setTimeout(layout, 100);
+if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+const auto = new URLSearchParams(location.search).get('story');
+if (auto && STORIES.find((s) => s.id === auto)) setTimeout(() => play(STORIES.find((s) => s.id === auto)), 600);
+</script>
+</body>
+</html>

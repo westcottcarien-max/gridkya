@@ -1,9 +1,9 @@
 // GridKya service worker – network first, falling back to cache so the
 // app keeps opening when the signal drops in the parking lot.
-const CACHE = 'gridkya-v1';
+const CACHE = 'gridkya-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './manifest.webmanifest', './icons/logo.png'])));
+  event.waitUntil(caches.open(CACHE).then((c) => c.addAll(['./', './index.html', './simulator.html', './manifest.webmanifest', './icons/logo.png'])));
   self.skipWaiting();
 });
 
