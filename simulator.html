@@ -92,6 +92,16 @@ select.btn{color:var(--text);padding:7px 12px;appearance:none;-webkit-appearance
 .welcome h2 em{font-style:normal;color:var(--gold)}
 .welcome p{color:var(--muted);margin:0 0 16px;line-height:1.5}
 .tabs{display:none}
+.livepill{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:7px 14px;font-weight:800;font-size:.8rem;letter-spacing:.06em;background:#0c0a06}
+.livepill[hidden],.btn[hidden]{display:none}
+.livepill i{width:10px;height:10px;border-radius:50%;background:#e0a530;box-shadow:0 0 10px #e0a530}
+.livepill.on i{background:#4ad37d;box-shadow:0 0 12px #4ad37d;animation:blink 1.6s infinite}
+.livepill.bad i{background:#e0584a;box-shadow:0 0 10px #e0584a}
+@keyframes blink{50%{opacity:.35}}
+body.watch .side,body.watch #voiceBtn,body.watch #resetBtn,body.watch #fsBtn,body.watch #liveBtn,body.watch #copyBtn,body.watch .ctl .btn{display:none!important}
+body.watch .wrap{grid-template-columns:minmax(0,1fr)}
+#tryBtn{display:none}
+body.watch #tryBtn{display:inline-block}
 .foot{padding:8px 20px;text-align:center;font-size:.74rem;color:var(--muted);border-top:1px solid var(--line)}
 .foot a{color:var(--gold)}
 @media (max-width:880px){
@@ -118,6 +128,10 @@ select.btn{color:var(--text);padding:7px 12px;appearance:none;-webkit-appearance
   <div class="logo"><img src="./brand/gridkya-logo-full.png" alt="GridKya – Simplifying Smart Community Living" /></div>
   <div><h1>GridKya <em>Live Simulator</em></h1><p>Six roles. One estate. Everything one person does appears for everyone, instantly.</p></div>
   <div class="spacer"></div>
+  <span class="livepill" id="livePill" hidden><i></i><span id="liveTxt">LIVE</span></span>
+  <button class="btn" id="copyBtn" hidden>Copy link for customer</button>
+  <button class="btn gold" id="liveBtn" title="Let a customer watch everything you do, live, on their own device">Go live</button>
+  <a class="btn gold" id="tryBtn" href="./simulator.html" style="text-decoration:none">Try it yourself</a>
   <button class="btn" id="voiceBtn" title="Spoken commentary">Voice: off</button>
   <button class="btn" id="resetBtn" title="Put the demo estate back to its starting point">Reset demo</button>
   <button class="btn" id="fsBtn">Full screen</button>
@@ -157,6 +171,7 @@ select.btn{color:var(--text);padding:7px 12px;appearance:none;-webkit-appearance
 <div class="foot">GridKya · Manage · Monitor · Maintain · Designed by <a href="https://www.drecar.co.za" target="_blank" rel="noreferrer">dréCAR Software Developers</a> · Demo data only</div>
 <div class="cursor" id="cursor"></div>
 
+<script src="./vendor/peerjs.min.js"></script>
 <script>
 'use strict';
 /* ───────────────────────── the roles ───────────────────────── */
@@ -175,14 +190,26 @@ const isSmall = () => window.matchMedia('(max-width:880px)').matches;
 /* ───────────────────────── devices ───────────────────────── */
 let devices = []; // { id, role, kind, el, frame, tag }
 let seq = 0;
+const WATCH = new URLSearchParams(location.search).get('watch');
+const DEFAULT_LIVE_ID = 'gridkya-live-k7m2q9xp4d';
+const live = { peer: null, conns: new Set(), last: new Map(), lastUi: '', timer: null, wake: null, retries: 0 };
+function liveSend(m) {
+  for (const c of live.conns) { try { c.send(m); } catch (e) { /* connection gone */ } }
+}
 
 function frameUrl(role) {
   return `./index.html?nosplash&sim=${Date.now()}${seq++}#${role}`;
 }
 function makeFrame(role) {
   const f = document.createElement('iframe');
-  f.name = `sim-${role}`;
   f.title = `${ROLES[role].label} – ${ROLES[role].who}`;
+  if (WATCH) {
+    f.setAttribute('sandbox', 'allow-same-origin');
+    f.style.pointerEvents = 'none';
+    f.srcdoc = '<!doctype html><body style="background:#080705">';
+    return f;
+  }
+  f.name = `sim-${role}`;
   f.setAttribute('allow', 'clipboard-write');
   f.src = frameUrl(role);
   return f;
@@ -208,7 +235,15 @@ function setDevices(specs) {
   const next = specs.map((sp) => devices.find((d) => d.id === sp.id && d.role === sp.role) || buildDevice(sp));
   devices.forEach((d) => { if (!next.includes(d)) d.el.remove(); });
   devices = next;
-  devices.forEach((d) => $('#stage').appendChild(d.el));
+  // Moving an iframe in the page reloads it, so only touch devices that are not already in place.
+  const stage = $('#stage');
+  const placed = [...stage.children].filter((e) => e.classList.contains('device'));
+  let same = true;
+  devices.forEach((d, i) => {
+    if (same && placed[i] === d.el) return;
+    same = false;
+    stage.appendChild(d.el);
+  });
   layout();
   renderTabs();
 }
@@ -366,12 +401,14 @@ async function pointAt(d, el) {
   const y = fr.top + (r.top + r.height / 2) * sc;
   cursor.classList.add('show');
   cursor.style.transform = `translate(${x}px,${y}px)`;
+  liveSend({ t: 'cursor', dev: d.id, x: r.left + Math.min(r.width / 2, 120), y: r.top + r.height / 2 });
   await sleep(700);
 }
 async function tapFx() {
   cursor.classList.remove('tap');
   void cursor.offsetWidth;
   cursor.classList.add('tap');
+  liveSend({ t: 'tap' });
   await sleep(250);
 }
 const note = (what) => { missing.push(what); console.warn('[simulator] not found:', what); };
@@ -939,17 +976,255 @@ document.addEventListener('keydown', (e) => {
 });
 $('#startFirst').onclick = () => play(STORIES[0]);
 
+/* ───────────────────────── live sharing ─────────────────────────
+   The presenter's screens are mirrored to any number of watchers, straight from
+   browser to browser (PeerJS / WebRTC). No demo data goes through a server. */
+const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+async function gz(str) {
+  if (!window.CompressionStream) return null;
+  const cs = new CompressionStream('gzip');
+  const w = cs.writable.getWriter();
+  w.write(new TextEncoder().encode(str));
+  w.close();
+  return new Uint8Array(await new Response(cs.readable).arrayBuffer());
+}
+async function gunzip(bytes) {
+  const ds = new DecompressionStream('gzip');
+  const w = ds.writable.getWriter();
+  w.write(bytes);
+  w.close();
+  return new Response(ds.readable).text();
+}
+const liveId = () => { try { return localStorage.getItem('gk-live-id') || DEFAULT_LIVE_ID; } catch (e) { return DEFAULT_LIVE_ID; } };
+const watchLink = () => `${location.origin}${location.pathname}?watch=${encodeURIComponent(liveId())}`;
+
+function snapshot(d) {
+  const doc = d.frame.contentDocument;
+  if (!doc || !doc.body || !doc.body.firstElementChild) return null;
+  const clone = doc.body.cloneNode(true);
+  const src = doc.body.querySelectorAll('input,textarea,select,canvas');
+  const dst = clone.querySelectorAll('input,textarea,select,canvas');
+  src.forEach((el, i) => {
+    const t = dst[i];
+    if (!t) return;
+    if (el.tagName === 'INPUT') {
+      if (el.type === 'checkbox' || el.type === 'radio') el.checked ? t.setAttribute('checked', '') : t.removeAttribute('checked');
+      else if (el.type !== 'file') t.setAttribute('value', el.value);
+    } else if (el.tagName === 'TEXTAREA') t.textContent = el.value;
+    else if (el.tagName === 'SELECT') [...t.options].forEach((o, j) => (el.options[j].selected ? o.setAttribute('selected', '') : o.removeAttribute('selected')));
+    else if (el.tagName === 'CANVAS') {
+      try {
+        const img = doc.createElement('img');
+        img.src = el.toDataURL();
+        img.className = el.className;
+        img.setAttribute('style', el.getAttribute('style') || '');
+        img.style.width = el.clientWidth + 'px';
+        img.style.height = el.clientHeight + 'px';
+        t.replaceWith(img);
+      } catch (e) { /* tainted canvas */ }
+    }
+  });
+  clone.querySelectorAll('script,noscript').forEach((n) => n.remove());
+  const scrolls = [];
+  doc.body.querySelectorAll('*').forEach((el, i) => { if (el.scrollTop > 0) scrolls.push([i, Math.round(el.scrollTop)]); });
+  const root = doc.documentElement;
+  return {
+    html: clone.innerHTML,
+    head: [...doc.head.querySelectorAll('link[rel=stylesheet],style')].map((n) => (n.tagName === 'LINK' ? { href: n.href } : { css: n.textContent })),
+    attrs: { html: root.className, theme: root.dataset.theme || '', hstyle: root.getAttribute('style') || '', body: doc.body.className, bstyle: doc.body.getAttribute('style') || '', sy: Math.round(doc.scrollingElement ? doc.scrollingElement.scrollTop : 0), scrolls },
+  };
+}
+
+function uiState() {
+  const act = devices.find((d) => d.el.classList.contains('active'));
+  return {
+    devices: devices.map((d) => ({ id: d.id, role: d.role, kind: d.baseKind, dim: d.el.classList.contains('dim') })),
+    active: act ? act.id : null,
+    title: $('#cTitle').textContent,
+    line: $('#line').innerHTML,
+    prog: $('#prog').style.width,
+    welcome: $('#welcome').style.display !== 'none',
+    cursor: cursor.classList.contains('show'),
+  };
+}
+
+let ticking = false;
+async function liveTick() {
+  if (ticking || !live.conns.size) return;
+  ticking = true;
+  try {
+    const ui = uiState();
+    const key = JSON.stringify(ui);
+    if (key !== live.lastUi) { live.lastUi = key; liveSend({ t: 'ui', ...ui }); }
+    for (const d of devices) {
+      const sn = snapshot(d);
+      if (!sn) continue;
+      const k = sn.html + JSON.stringify(sn.attrs) + JSON.stringify(sn.head);
+      if (live.last.get(d.id) === k) continue;
+      live.last.set(d.id, k);
+      const z = await gz(sn.html);
+      liveSend({ t: 'snap', dev: d.id, role: d.role, z, html: z ? '' : sn.html, head: sn.head, attrs: sn.attrs });
+    }
+  } finally { ticking = false; }
+}
+
+function setLive(state, text) {
+  const pill = $('#livePill');
+  pill.hidden = state === 'off';
+  pill.className = 'livepill ' + (state === 'on' ? 'on' : state === 'bad' ? 'bad' : '');
+  $('#liveTxt').textContent = text || '';
+  $('#liveBtn').textContent = state === 'off' ? 'Go live' : 'Stop live';
+  $('#liveBtn').classList.toggle('gold', state === 'off');
+  $('#copyBtn').hidden = state === 'off';
+}
+const watchers = () => `LIVE · ${live.conns.size} watching`;
+
+async function keepAwake() {
+  try { live.wake = await navigator.wakeLock?.request('screen'); } catch (e) { /* not supported */ }
+}
+document.addEventListener('visibilitychange', () => { if (live.peer && document.visibilityState === 'visible') keepAwake(); });
+
+function startLive() {
+  if (live.peer) return;
+  setLive('wait', 'Going live…');
+  const p = new Peer(liveId(), { debug: 0 });
+  live.peer = p;
+  p.on('open', () => { live.retries = 0; setLive('on', watchers()); keepAwake(); live.timer = setInterval(liveTick, 250); });
+  p.on('connection', (c) => {
+    c.on('open', () => { live.conns.add(c); live.last.clear(); live.lastUi = ''; setLive('on', watchers()); });
+    const drop = () => { live.conns.delete(c); if (live.peer) setLive('on', watchers()); };
+    c.on('close', drop);
+    c.on('error', drop);
+  });
+  p.on('disconnected', () => { setLive('wait', 'Reconnecting…'); try { p.reconnect(); } catch (e) { /* ignore */ } });
+  p.on('error', (e) => {
+    if (e.type === 'unavailable-id' && live.retries < 4) { live.retries++; stopLive(true); setTimeout(startLive, 3000); return; }
+    setLive('bad', e.type === 'unavailable-id' ? 'Already live in another window' : 'Cannot reach the connection service');
+  });
+}
+function stopLive(quiet) {
+  clearInterval(live.timer);
+  try { live.peer && live.peer.destroy(); } catch (e) { /* ignore */ }
+  try { live.wake && live.wake.release(); } catch (e) { /* ignore */ }
+  live.peer = null; live.conns.clear(); live.last.clear(); live.lastUi = '';
+  if (!quiet) setLive('off');
+}
+$('#liveBtn').onclick = () => (live.peer ? stopLive() : startLive());
+$('#copyBtn').onclick = async () => {
+  const link = watchLink();
+  try {
+    if (navigator.share && isSmall()) await navigator.share({ title: 'GridKya live demonstration', url: link });
+    else await navigator.clipboard.writeText(link);
+    $('#copyBtn').textContent = 'Link copied';
+  } catch (e) {
+    window.prompt('Send this link to your customer:', link);
+  }
+  setTimeout(() => ($('#copyBtn').textContent = 'Copy link for customer'), 2200);
+};
+window.addEventListener('beforeunload', () => stopLive(true));
+
+/* ── the watcher's side ── */
+function watchStatus(kind, text) {
+  setLive(kind === 'ok' ? 'on' : kind === 'bad' ? 'bad' : 'wait', text);
+  if (kind === 'ok') $('#welcome').style.display = 'none';
+  else { $('#welcome').style.display = ''; $('#welcome').innerHTML = `<div><h2>${esc(text)}</h2><p>This page shows what the presenter is doing in GridKya, live. Keep it open.</p></div>`; }
+}
+function applyUi(m) {
+  setDevices(m.devices);
+  devices.forEach((d) => {
+    const spec = m.devices.find((x) => x.id === d.id);
+    d.el.classList.toggle('active', d.id === m.active);
+    d.el.classList.toggle('dim', !!(spec && spec.dim));
+  });
+  layout();
+  renderTabs();
+  $('#cTitle').textContent = m.title;
+  $('#line').innerHTML = m.line;
+  $('#prog').style.width = m.prog;
+  cursor.classList.toggle('show', !!m.cursor);
+}
+async function applySnap(m) {
+  const d = dev(m.dev);
+  if (!d || d.role !== m.role) return;
+  const f = d.frame;
+  const headKey = JSON.stringify(m.head);
+  if (f._head !== headKey) {
+    f._head = headKey;
+    const before = f.contentDocument;
+    f.srcdoc = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${m.head.map((h) => (h.href ? `<link rel="stylesheet" href="${esc(h.href)}">` : `<style>${h.css}</style>`)).join('')}</head><body></body></html>`;
+    for (let i = 0; i < 60 && !(f.contentDocument && f.contentDocument !== before && f.contentDocument.body && f.contentDocument.head.childNodes.length); i++) await delay(50);
+  }
+  const doc = f.contentDocument;
+  if (!doc || !doc.body) return;
+  const html = m.z ? await gunzip(m.z) : m.html;
+  const a = m.attrs;
+  const root = doc.documentElement;
+  root.className = a.html;
+  if (a.theme) root.dataset.theme = a.theme;
+  else delete root.dataset.theme;
+  root.setAttribute('style', a.hstyle);
+  doc.body.className = a.body;
+  doc.body.setAttribute('style', a.bstyle);
+  doc.body.innerHTML = html;
+  const all = doc.body.querySelectorAll('*');
+  a.scrolls.forEach(([i, top]) => { if (all[i]) all[i].scrollTop = top; });
+  if (doc.scrollingElement) doc.scrollingElement.scrollTop = a.sy;
+}
+function onWatchData(m) {
+  if (m.t === 'ui') applyUi(m);
+  else if (m.t === 'snap') { const d = dev(m.dev); if (d) d._q = (d._q || Promise.resolve()).then(() => applySnap(m)).catch((e) => console.error('snap failed', e && e.message, typeof m.z, m.z && m.z.constructor && m.z.constructor.name)); }
+  else if (m.t === 'cursor') {
+    const d = dev(m.dev);
+    if (!d) return;
+    const fr = d.frame.getBoundingClientRect();
+    if (!fr.width) return;
+    const sc = fr.width / d.frame.clientWidth;
+    cursor.classList.add('show');
+    cursor.style.transform = `translate(${fr.left + m.x * sc}px,${fr.top + m.y * sc}px)`;
+  } else if (m.t === 'tap') { cursor.classList.remove('tap'); void cursor.offsetWidth; cursor.classList.add('tap'); }
+}
+function startWatching(id) {
+  document.body.classList.add('watch');
+  document.title = 'GridKya – live demonstration';
+  $('.top h1').innerHTML = 'GridKya <em>Live Demonstration</em>';
+  $('.top p').textContent = 'You are watching the presenter’s screens, live.';
+  $('#line').innerHTML = '<small>Live</small>Captions of what is happening appear here.';
+  $('#cTitle').textContent = 'Live';
+  watchStatus('wait', 'Connecting to the presenter…');
+  let retry = null;
+  const p = new Peer({ debug: 0 });
+  const connect = () => {
+    clearTimeout(retry);
+    const c = p.connect(id, { reliable: true });
+    c.on('open', () => watchStatus('ok', 'LIVE'));
+    c.on('data', onWatchData);
+    c.on('close', () => { watchStatus('wait', 'Waiting for the presenter to come back…'); retry = setTimeout(connect, 2500); });
+    c.on('error', () => { retry = setTimeout(connect, 3000); });
+  };
+  p.on('open', connect);
+  p.on('disconnected', () => { try { p.reconnect(); } catch (e) { /* ignore */ } });
+  p.on('error', (e) => {
+    if (e.type === 'peer-unavailable') { watchStatus('wait', 'Waiting for the presenter to go live…'); clearTimeout(retry); retry = setTimeout(connect, 3000); }
+    else if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) { watchStatus('bad', 'Cannot reach the connection service'); clearTimeout(retry); retry = setTimeout(() => (p.disconnected ? p.reconnect() : connect()), 4000); }
+  });
+}
+
 window.__sim = { play, stories: STORIES, missing, run, dev: (id) => dev(id), stop, explore };
 
-/* start with the two most common devices on screen so the page is never empty */
-setDevices([{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'tenant' }]);
-focusDevice('lap');
-renderStories();
-renderChips();
+if (WATCH) {
+  startWatching(WATCH);
+} else {
+  /* start with the two most common devices on screen so the page is never empty */
+  setDevices([{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'tenant' }]);
+  focusDevice('lap');
+  renderStories();
+  renderChips();
+  const auto = new URLSearchParams(location.search).get('story');
+  if (auto && STORIES.find((st) => st.id === auto)) setTimeout(() => play(STORIES.find((st) => st.id === auto)), 600);
+  if (new URLSearchParams(location.search).has('golive')) startLive();
+}
 setTimeout(layout, 100);
 if ('serviceWorker' in navigator) window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
-const auto = new URLSearchParams(location.search).get('story');
-if (auto && STORIES.find((s) => s.id === auto)) setTimeout(() => play(STORIES.find((s) => s.id === auto)), 600);
 </script>
 </body>
 </html>
