@@ -798,6 +798,49 @@ const STORIES = [
     ],
   },
   {
+    id: 'debitorder', title: 'NEW · Debit order and extra charges', blurb: 'The owner sends the signed debit order form; the agent activates it, raises a charge, and it all shows on the statement.',
+    devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
+    reset: true,
+    chapters: [
+      ['Owner gets the form', async () => {
+        const ph = A('ph');
+        await ph.go('payments/debit-order/form');
+        await say('ph', 'Lindiwe wants her levy collected automatically. The debit order form is already filled in with her name, unit and reference.');
+      }],
+      ['Signs and uploads it', async () => {
+        const ph = A('ph');
+        await ph.go('payments/debit-order');
+        await say('ph', 'She signs it and uploads it right here.');
+        await ph.attach('Debit order – signed', 'signed-debit-order.png');
+        await ph.click('Send signed form');
+      }],
+      ['Agent activates it', async () => {
+        const lap = A('lap');
+        await lap.go('payments/debit-orders');
+        await say('lap', 'The signed form arrives on the managing agent’s debit order list. Only the last four digits of the account are kept in GridKya.');
+        await lap.click('Activate');
+        await lap.fill('Last 4 digits of the account', '4821');
+        await lap.click('Activate');
+        await say('ph', 'Lindiwe is told at once that her debit order is active.');
+      }],
+      ['Any charge, on the statement', async () => {
+        const lap = A('lap');
+        await lap.go('payments/charges');
+        await say('lap', 'Besides levies, the agent can raise any charge: legal costs, metered electricity, an admin fee or the CSOS levy.');
+        await lap.choose('Unit', /ACA-P012/);
+        await lap.choose('Kind of charge', 'Legal & collection costs');
+        await lap.fill('Amount (R)', '1150');
+        await lap.fill('Description on the statement', 'Letter of demand');
+        await lap.click('Raise charge');
+      }],
+      ['The owner’s statement', async () => {
+        const ph = A('ph');
+        await ph.go('payments/statement');
+        await say('ph', 'Every levy, water charge, payment and extra charge is on Lindiwe’s statement, with its type, the balance and how to pay.');
+      }],
+    ],
+  },
+  {
     id: 'owner', title: 'The Owner role: account, statement and tenants', blurb: 'Lindiwe owns two units and lets both. Her account, reference, statement, tenants and tax figures.',
     devices: [{ id: 'ph', role: 'owner' }],
     reset: true,

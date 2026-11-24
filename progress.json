@@ -12,6 +12,18 @@
   "updates": [
     {
       "date": "2026-11-24",
+      "title": "Owner: every Levies & Payments requirement checked end to end",
+      "items": [
+        "Debit order: the owner downloads the pre-filled form, signs and uploads it; the agent activates it; the owner is told",
+        "Debit order collections now get a receipt number and a payment confirmation, like every other payment",
+        "If the bank returns a debit order unpaid, the owner is warned straight away",
+        "Managing agent can raise any additional charge (legal costs, electricity, admin fee, CSOS levy…) on one unit or all units – it shows on the owner’s statement and the owner is notified",
+        "Fines, interest and special levies are labelled on the statement; special levies use their own due date",
+        "Statement lines on the same day now stay in the order they happened"
+      ]
+    },
+    {
+      "date": "2026-11-24",
       "title": "Owner: Property value, Home inspection and Ask GridKya",
       "items": [
         "Property Value Tracker: estimated value of each unit with a range and confidence, value over time, area trends and recent sales in the scheme",
