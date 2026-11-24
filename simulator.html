@@ -187,7 +187,7 @@ body.watch #tryBtn{display:inline-block}
       <div class="welcome" id="welcome"><div>
         <h2>Follow <em>GridKya</em> as it is built</h2>
         <p>This page always shows the latest version of the app. “Project progress” on the left shows which roles are ready and what changed. Watch a guided story, or tap the roles and use the real app yourself.</p>
-        <button class="btn gold" id="startFirst">Watch the newest: the Owner role</button>
+        <button class="btn gold" id="startFirst">Watch the newest update</button>
       </div></div>
     </div>
     <div class="cap">
@@ -750,7 +750,55 @@ const STORIES = [
     ],
   },
   {
-    id: 'owner', title: 'NEW · The Owner role', blurb: 'Lindiwe owns two units and lets both. Her account, reference, statement, tenants and tax figures.',
+    id: 'ownerplus', title: 'NEW · Owner: value, home inspection and Ask GridKya', blurb: 'What her unit is worth against the estate, a home inspection that spots a roof leak, and instant answers.',
+    devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
+    reset: true,
+    chapters: [
+      ['Ask GridKya', async () => {
+        const ph = A('ph');
+        await ph.go('ask');
+        await say('ph', 'Lindiwe has a question at 9 at night. Instead of emailing the office, she asks GridKya.');
+        await ph.click('Can I keep a dog?');
+        await say('ph', 'The answer comes straight from the estate’s own conduct rules.');
+        await ph.click('What is my levy balance?');
+        await say('ph', 'And from her own account – only her units, never anyone else’s.');
+      }],
+      ['What her unit is worth', async () => {
+        const ph = A('ph');
+        await ph.go('owner/value');
+        await say('ph', 'The Property Value Tracker estimates what Protea 12 is worth from sales in the scheme, with a range and a confidence level.');
+        await say('ph', 'Estate benchmarking: her unit grew faster than the estate average since she bought it. Owners love watching this.');
+      }],
+      ['Home inspection', async () => {
+        const ph = A('ph');
+        await ph.go('owner/inspection');
+        await say('ph', 'Every six months Lindiwe runs a home inspection: a few photos and simple yes or no questions, room by room.');
+        await ph.click('Start a home inspection');
+        await ph.click(/^Start with/);
+        await ph.photo();
+        await ph.click('Yes');
+        await say('ph', 'Brown stains on the ceiling. GridKya flags a possible roof leak.');
+        await ph.click(/^Next:/);
+        await ph.click(/^Next:/);
+        await ph.click(/^Next:/);
+        await ph.click('See my report');
+        await say('ph', 'The report says how urgent each problem is, roughly what it costs, and who must fix it. A roof leak is common property, so the body corporate pays.');
+        await ph.click('Report to the managing agent');
+      }],
+      ['The agent already has it', async () => {
+        const lap = A('lap');
+        await lap.go('maintenance');
+        await say('lap', 'The roof leak is on the managing agent’s job board, with Lindiwe’s photo, before it damages the ceiling.');
+      }],
+      ['Estate information', async () => {
+        const ph = A('ph');
+        await ph.go('info/contacts');
+        await say('ph', 'And everything else is in one place: hours, contacts, emergency numbers and the rules.');
+      }],
+    ],
+  },
+  {
+    id: 'owner', title: 'The Owner role: account, statement and tenants', blurb: 'Lindiwe owns two units and lets both. Her account, reference, statement, tenants and tax figures.',
     devices: [{ id: 'ph', role: 'owner' }],
     reset: true,
     chapters: [
@@ -793,7 +841,7 @@ const STORIES = [
     ],
   },
   {
-    id: 'wrongref', title: 'NEW · Paid with the wrong reference', blurb: 'The owner uploads proof of payment; the agent imports the bank statement, allocates, and the owner gets a receipt.',
+    id: 'wrongref', title: 'Paid with the wrong reference', blurb: 'The owner uploads proof of payment; the agent imports the bank statement, allocates, and the owner gets a receipt.',
     devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
     reset: true,
     chapters: [
@@ -1109,7 +1157,7 @@ $('#fsBtn').onclick = () => {
 document.addEventListener('keydown', (e) => {
   if (e.key === ' ' && story && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(e.target.tagName)) { e.preventDefault(); $('#pauseBtn').click(); }
 });
-$('#startFirst').onclick = () => play(STORIES.find((s) => s.id === 'owner') || STORIES[0]);
+$('#startFirst').onclick = () => play(STORIES.find((s) => /^NEW/.test(s.title)) || STORIES[0]);
 
 /* ───────────────────────── live sharing ─────────────────────────
    The presenter's screens are mirrored to any number of watchers, straight from

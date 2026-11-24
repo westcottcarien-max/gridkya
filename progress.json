@@ -2,7 +2,7 @@
   "project": "GridKya",
   "intro": "GridKya is being built one role at a time. Each role is finished, tested and shown here before the next one starts.",
   "roles": [
-    { "id": "owner", "label": "Owner", "status": "ready", "note": "Built and tested – ready for your review", "story": "owner" },
+    { "id": "owner", "label": "Owner", "status": "ready", "note": "Built and tested – levies, statements, tenants, property value, home inspection and Ask GridKya", "story": "ownerplus" },
     { "id": "agent", "label": "Managing Agent", "status": "building", "note": "Levies & Payments done (bank statement import and allocation) – rest coming next", "story": "wrongref" },
     { "id": "estate", "label": "Estate Agent", "status": "planned", "note": "Early demo version – will be rebuilt" },
     { "id": "trustee", "label": "Trustee", "status": "planned", "note": "Early demo version – will be rebuilt" },
@@ -10,6 +10,19 @@
     { "id": "contractor", "label": "Contractor", "status": "planned", "note": "Early demo version – will be rebuilt" }
   ],
   "updates": [
+    {
+      "date": "2026-11-24",
+      "title": "Owner: Property value, Home inspection and Ask GridKya",
+      "items": [
+        "Property Value Tracker: estimated value of each unit with a range and confidence, value over time, area trends and recent sales in the scheme",
+        "Estate benchmarking: “your unit grew 4,4% a year – the estate average is 3,4%”",
+        "Home inspection: photos and simple yes/no questions per room; flags cracks, damp, leaks and roof problems, how urgent they are, rough cost, and who must fix it (owner or body corporate)",
+        "One tap turns an inspection finding into a repair on the managing agent’s job board",
+        "Ask GridKya: instant answers about your levy, reference, the rules, pool hours, refuse days, meetings and contacts",
+        "Estate information: hours, contacts, emergency numbers and searchable conduct rules in one place",
+        "Market data is sample data and photo AI switches on once a provider is connected – both are labelled in the app"
+      ]
+    },
     {
       "date": "2026-11-24",
       "title": "Owner role and Levies & Payments",
