@@ -104,7 +104,31 @@ body.watch .wrap{grid-template-columns:minmax(0,1fr)}
 body.watch #tryBtn{display:inline-block}
 .foot{padding:8px 20px;text-align:center;font-size:.74rem;color:var(--muted);border-top:1px solid var(--line)}
 .foot a{color:var(--gold)}
+/* project progress */
+.verpill{display:inline-flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;padding:5px 12px;background:#0c0a06;font-size:.72rem;color:var(--muted);line-height:1.3}
+.verpill b{color:var(--gold2);font-size:.78rem}
+.progress{border:1px solid var(--line);background:var(--panel);border-radius:14px;padding:12px 14px;margin-bottom:18px}
+.progress p{margin:0 0 10px;color:var(--muted);font-size:.8rem;line-height:1.4}
+.rolerow{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:9px 0}
+.rolerow:first-of-type{border-top:0}
+.rolerow:hover b{color:var(--gold2)}
+.rolerow b{display:block;font:700 .88rem var(--f-head)}
+.rolerow small{display:block;color:var(--muted);font-size:.76rem;line-height:1.35;margin-top:2px}
+.st{flex:none;margin-top:2px;font-size:.62rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;border-radius:999px;padding:3px 8px;border:1px solid var(--line);white-space:nowrap}
+.st.ready{border-color:#3f8f63;color:#9be3b8;background:rgba(127,209,160,.12)}
+.st.building{border-color:var(--gold3);color:var(--gold2);background:rgba(217,178,92,.12)}
+.st.planned{color:var(--muted)}
+.news{margin:10px 0 0;padding:10px 0 0;border-top:1px solid var(--line)}
+.news summary{cursor:pointer;font-weight:800;font-size:.82rem;color:var(--gold2)}
+.news ul{margin:8px 0 0;padding-left:18px;color:var(--text);font-size:.8rem;line-height:1.45}
+.news li{margin-bottom:4px}
+.news .when{color:var(--muted);font-size:.74rem;margin-top:6px}
+.updbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:70;display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center;
+  background:#12100b;border:1px solid var(--gold);border-radius:16px;padding:12px 16px;box-shadow:0 0 40px -6px var(--glow);max-width:calc(100% - 32px)}
+.updbar[hidden]{display:none}
+.updbar span{font-weight:700;font-size:.9rem}
 @media (max-width:880px){
+  .verpill{display:none}
   body{display:flex;flex-direction:column;height:auto;overflow:auto;min-height:100vh}
   .wrap{display:flex;flex-direction:column;flex:1}
   .side{border-right:0;border-top:1px solid var(--line);order:2}
@@ -128,6 +152,7 @@ body.watch #tryBtn{display:inline-block}
   <div class="logo"><img src="./brand/gridkya-logo-full.png" alt="GridKya – Simplifying Smart Community Living" /></div>
   <div><h1>GridKya <em>Live Simulator</em></h1><p>Six roles. One estate. Everything one person does appears for everyone, instantly.</p></div>
   <div class="spacer"></div>
+  <span class="verpill" id="verPill" hidden><b id="verTxt"></b><span id="verWhen"></span></span>
   <span class="livepill" id="livePill" hidden><i></i><span id="liveTxt">LIVE</span></span>
   <button class="btn" id="copyBtn" hidden>Copy link for customer</button>
   <button class="btn gold" id="liveBtn" title="Let a customer watch everything you do, live, on their own device">Go live</button>
@@ -139,6 +164,14 @@ body.watch #tryBtn{display:inline-block}
 
 <div class="wrap">
   <aside class="side" id="side">
+    <section id="progressBox" hidden>
+      <h2>Project progress</h2>
+      <div class="progress">
+        <p id="progIntro"></p>
+        <div id="roleStatus"></div>
+        <details class="news" id="news" open><summary id="newsTitle">What’s new</summary><ul id="newsList"></ul><div class="when" id="newsWhen"></div></details>
+      </div>
+    </section>
     <h2>Guided stories</h2>
     <div id="stories"></div>
     <h2 style="margin-top:20px">Explore it yourself</h2>
@@ -150,9 +183,9 @@ body.watch #tryBtn{display:inline-block}
     <div class="tabs" id="tabs"></div>
     <div class="stage" id="stage">
       <div class="welcome" id="welcome"><div>
-        <h2>See <em>every role</em> at work</h2>
-        <p>Pick a guided story on the left and watch a tenant, a managing agent, a contractor and the trustees run a complex together, or tap the roles and use the app yourself.</p>
-        <button class="btn gold" id="startFirst">Start with “Meet the six capacities”</button>
+        <h2>Follow <em>GridKya</em> as it is built</h2>
+        <p>This page always shows the latest version of the app. “Project progress” on the left shows which roles are ready and what changed. Watch a guided story, or tap the roles and use the real app yourself.</p>
+        <button class="btn gold" id="startFirst">Watch the newest: the Owner role</button>
       </div></div>
     </div>
     <div class="cap">
@@ -170,6 +203,7 @@ body.watch #tryBtn{display:inline-block}
 </div>
 <div class="foot">GridKya · Manage · Monitor · Maintain · Designed by <a href="https://www.drecar.co.za" target="_blank" rel="noreferrer">dréCAR Software Developers</a> · Demo data only</div>
 <div class="cursor" id="cursor"></div>
+<div class="updbar" id="updBar" role="status" hidden><span id="updTxt">GridKya has been updated.</span><button class="btn gold" id="updBtn">Show the new version</button><button class="btn" id="updLater">Later</button></div>
 
 <script src="./vendor/peerjs.min.js"></script>
 <script>
@@ -506,6 +540,29 @@ function api(id) {
       inp.dispatchEvent(new W.Event('change', { bubbles: true }));
       await sleep(900);
     },
+    /** Attach a made-up document (e.g. a proof of payment) to the last file field on screen. */
+    async attach(title = 'Proof of payment', name = 'proof-of-payment.png') {
+      const doc = d().frame.contentDocument;
+      const inp = await waitFor(() => [...doc.querySelectorAll('input[type=file]')].pop());
+      if (!inp) return note('file input');
+      const label = inp.closest('label');
+      if (label && visible(label)) { await pointAt(d(), label); await tapFx(); }
+      const c = document.createElement('canvas');
+      c.width = 600; c.height = 380;
+      const g = c.getContext('2d');
+      g.fillStyle = '#ffffff'; g.fillRect(0, 0, 600, 380);
+      g.fillStyle = '#0b5f3a'; g.fillRect(0, 0, 600, 64);
+      g.fillStyle = '#ffffff'; g.font = '700 26px sans-serif'; g.fillText(title.toUpperCase(), 24, 42);
+      g.fillStyle = '#222'; g.font = '20px sans-serif';
+      ['Payment successful', 'To: ACACIA GARDENS BC', 'Reference: LINDIWE K LEVY', `Date: ${new Date().toLocaleDateString('en-ZA')}`].forEach((t, i) => g.fillText(t, 24, 120 + i * 40));
+      const blob = await new Promise((r) => c.toBlob(r, 'image/png'));
+      const W = win();
+      const dt = new W.DataTransfer();
+      dt.items.add(new W.File([blob], name, { type: 'image/png' }));
+      inp.files = dt.files;
+      inp.dispatchEvent(new W.Event('change', { bubbles: true }));
+      await sleep(1200);
+    },
     async esc() {
       const doc = d().frame.contentDocument;
       doc.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
@@ -548,8 +605,7 @@ const STORIES = [
       }],
       ['Owner', async () => {
         await A('ph').swap('owner');
-        await say('ph', 'An owner sees their own unit: levies, statements, debit order, and the tenant renting the unit.');
-        await A('ph').go('g/financial');
+        await say('ph', 'An owner sees every unit they own: what is due, what needs their attention, their tenants and their statements.');
         await sleep(900);
       }],
       ['Tenant', async () => {
@@ -692,14 +748,95 @@ const STORIES = [
     ],
   },
   {
-    id: 'levy', title: 'Levies, rent and arrears', blurb: 'The owner loads a tenant’s arrears; the agent sees collections.',
+    id: 'owner', title: 'NEW · The Owner role', blurb: 'Lindiwe owns two units and lets both. Her account, reference, statement, tenants and tax figures.',
+    devices: [{ id: 'ph', role: 'owner' }],
+    reset: true,
+    chapters: [
+      ['Everything at a glance', async () => {
+        const ph = A('ph');
+        await ph.go('');
+        await say('ph', 'Lindiwe owns Protea 12 and Fynbos 16, and lets both. Her home screen adds up the levies due on all her units.');
+        await say('ph', 'Below it, only what needs her attention: overdue levies, a vote, a meeting and a lease that is about to end.');
+      }],
+      ['Her levy account and reference', async () => {
+        const ph = A('ph');
+        await ph.go('payments/account');
+        await say('ph', 'Levies and Payments shows what is due and whether it is overdue, for each unit.');
+        await ph.click('Copy', { timeout: 3000 });
+        await say('ph', 'Every unit has its own payment reference. Pay with it, and the payment is recognised and allocated automatically.');
+      }],
+      ['A proper statement', async () => {
+        const ph = A('ph');
+        await ph.go('payments/statement');
+        await say('ph', 'The statement shows every levy, water charge and payment, with the balance, an age analysis and how to pay. Print it or save it as a PDF.');
+      }],
+      ['Debit order form', async () => {
+        const ph = A('ph');
+        await ph.go('payments/debit-order/form');
+        await say('ph', 'The debit order form is already filled in with her details and reference. She signs it and uploads it in the app.');
+      }],
+      ['Her units and tenants', async () => {
+        const ph = A('ph');
+        await ph.go('owner/units');
+        await say('ph', 'My units shows each unit: reference, levy, balance, who lives there and any open repairs.');
+        await ph.go('owner/rentals');
+        await say('ph', 'Werner Steyn’s lease in Fynbos 16 ends soon. Lindiwe offers a renewal at the agreed increase with one tap, and the managing agent prepares it.');
+        await ph.click(/^Offer a renewal/, { twice: true, timeout: 3000 });
+      }],
+      ['Ready for tax', async () => {
+        const ph = A('ph');
+        await ph.go('owner/income');
+        await say('ph', 'Income and costs adds up the rent earned, levies and charges for each unit in the tax year, ready to send to her tax practitioner.');
+      }],
+    ],
+  },
+  {
+    id: 'wrongref', title: 'NEW · Paid with the wrong reference', blurb: 'The owner uploads proof of payment; the agent imports the bank statement, allocates, and the owner gets a receipt.',
+    devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
+    reset: true,
+    chapters: [
+      ['Owner sends proof of payment', async () => {
+        const ph = A('ph');
+        await ph.go('payments/proof');
+        await say('ph', 'Lindiwe paid her Protea 12 levy by EFT, but typed her name instead of her reference. The system cannot recognise that payment, so she uploads the proof.');
+        await ph.fill('Reference you used', 'LINDIWE K LEVY');
+        await ph.attach();
+        await ph.click('Send to the managing agent');
+        await say('ph', 'It goes straight to the managing agent.');
+      }],
+      ['Agent imports the bank statement', async () => {
+        const lap = A('lap');
+        await lap.go('payments/import');
+        await say('lap', 'The managing agent downloads the bank statement as a CSV file and uploads it. Here we use a demo statement.');
+        await lap.click('Use the demo statement');
+        await say('lap', 'Every deposit with a valid reference is recognised, however the owner typed it. Lindiwe’s payment needs attention.');
+        await lap.click(/^Allocate \d+ payment/);
+        await say('lap', 'One tap allocates them all. Each owner gets a confirmation and a receipt.');
+      }],
+      ['Agent allocates from the proof', async () => {
+        const lap = A('lap');
+        await lap.go('payments/allocate');
+        await say('lap', 'Lindiwe’s proof of payment is shown next to the matching deposit on the bank statement.');
+        await lap.click(/^Allocate to Protea 12/);
+        await say('lap', 'Allocated to Protea 12.');
+      }],
+      ['Owner gets her receipt', async () => {
+        const ph = A('ph');
+        await ph.go('payments/receipts');
+        await ph.click({ css: 'a.row-link', text: /./ }, { timeout: 3000 });
+        await say('ph', 'Lindiwe is notified at once and has a receipt. Her account now shows the payment, with a full record of how it was allocated.');
+      }],
+    ],
+  },
+  {
+    id: 'levy', title: 'Rent arrears', blurb: 'The owner loads a tenant’s arrears; the tenant sees it; the agent sees collections.',
     devices: [{ id: 'ph', role: 'owner' }, { id: 'ph2', role: 'tenant' }, { id: 'lap', role: 'agent' }],
     reset: true,
     chapters: [
       ['Owner loads tenant arrears', async () => {
         const ph = A('ph');
-        await ph.go('payments/tenant-arrears');
-        await say('ph', 'Lindiwe owns a unit that Thandi rents. When rent falls behind, the owner can load the tenant’s arrears.');
+        await ph.go('owner/rentals');
+        await say('ph', 'Thandi rents Lindiwe’s unit in Protea 12. When rent falls behind, Lindiwe can load the arrears on Thandi’s rent account.');
         await ph.click('Load arrears');
         await ph.fill('Amount (R)', '9800');
         await ph.click('Load arrears');
@@ -709,14 +846,6 @@ const STORIES = [
         const t = A('ph2');
         await t.go('payments/rent');
         await say('ph2', 'Thandi sees exactly what she owes and can pay securely in the app.');
-      }],
-      ['Owner pays the levy', async () => {
-        const ph = A('ph');
-        await ph.go('payments/levies');
-        await say('ph', 'The owner also pays the monthly levy in a few taps.');
-        await ph.click('Pay now');
-        await sleep(2200);
-        await ph.esc();
       }],
       ['Agent sees collections', async () => {
         const lap = A('lap');
@@ -769,21 +898,21 @@ const STORIES = [
     ],
   },
   {
-    id: 'watchdog', title: 'The Utility Watchdog', blurb: 'An owner checks an electricity bill against their own meter and the tariff.',
-    devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
+    id: 'watchdog', title: 'The Utility Watchdog', blurb: 'A resident checks an electricity bill against their own meter and the tariff.',
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'agent' }],
     reset: true,
     chapters: [
-      ['Owner checks the bill', async () => {
+      ['Resident checks the bill', async () => {
         const ph = A('ph');
         await ph.go('watchdog/check');
-        await say('ph', 'Lindiwe suspects her electricity bill is too high. She enters what she was billed and her own meter readings.');
+        await say('ph', 'Thandi suspects her electricity bill is too high. She enters what she was billed and her own meter readings.');
         await ph.fill(/Units billed/, '520');
         await ph.fill(/Total amount billed/, '2150');
         await ph.fill(/Opening reading/, '18652');
         await ph.fill(/Closing reading/, '19041');
         await ph.click(/Run my Fair Metering check/);
         await sleep(800);
-        await say('ph', 'GridKya compares the bill with her meter and the official municipal tariff, and shows the difference in rands.');
+        await say('ph', 'GridKya compares the bill with the meter and the official municipal tariff, and shows the difference in rands.');
       }],
       ['Agent sees utilities', async () => {
         const lap = A('lap');
@@ -817,7 +946,9 @@ const STORIES = [
 function renderStories() {
   const box = $('#stories');
   box.innerHTML = '';
-  STORIES.forEach((s) => {
+  // The newest work first, so the client sees the latest progress straight away.
+  const isNew = (s) => (/^NEW/.test(s.title) ? 1 : 0);
+  [...STORIES].sort((a, b) => isNew(b) - isNew(a)).forEach((s) => {
     const b = document.createElement('button');
     b.className = 'story' + (story === s ? ' cur' : '');
     b.dataset.id = s.id;
@@ -895,7 +1026,9 @@ async function play(s) {
     await delay(300);
     focusDevice(s.devices[0].id);
     $('#line').innerHTML = '<small>GridKya</small>Loading the demo estate…';
-    await sleep(2200);
+    // Wait until every device has really opened the app (slow phones and connections take longer).
+    await waitFor(() => devices.every((d) => { try { return !!d.frame.contentDocument?.querySelector('.shell main'); } catch (e) { return false; } }), 20000);
+    await sleep(900);
     for (let i = 0; i < s.chapters.length; i++) {
       mark(i);
       $('#cTitle').textContent = `${s.title} · ${i + 1}/${s.chapters.length}: ${s.chapters[i][0]}`;
@@ -974,7 +1107,7 @@ $('#fsBtn').onclick = () => {
 document.addEventListener('keydown', (e) => {
   if (e.key === ' ' && story && !/INPUT|TEXTAREA|SELECT|BUTTON/.test(e.target.tagName)) { e.preventDefault(); $('#pauseBtn').click(); }
 });
-$('#startFirst').onclick = () => play(STORIES[0]);
+$('#startFirst').onclick = () => play(STORIES.find((s) => s.id === 'owner') || STORIES[0]);
 
 /* ───────────────────────── live sharing ─────────────────────────
    The presenter's screens are mirrored to any number of watchers, straight from
@@ -1208,6 +1341,75 @@ function startWatching(id) {
     else if (['network', 'server-error', 'socket-error', 'socket-closed'].includes(e.type)) { watchStatus('bad', 'Cannot reach the connection service'); clearTimeout(retry); retry = setTimeout(() => (p.disconnected ? p.reconnect() : connect()), 4000); }
   });
 }
+
+/* ───────────────────────── project progress & always the latest version ─────────────────────────
+   progress.json (which roles are ready, what changed) and version.json (written by every
+   build) are published with the app. Anyone with this page open is told within a minute
+   when a new version goes live, and the page refreshes itself when nothing is playing. */
+const fresh = (file) => fetch(`./${file}?t=${Date.now()}`, { cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+const STATUS = { ready: 'Ready', building: 'In progress', planned: 'Planned' };
+const longDate = (d) => new Date(d).toLocaleDateString('en-ZA', { day: 'numeric', month: 'long', year: 'numeric' });
+
+async function loadProgress() {
+  const p = await fresh('progress.json');
+  if (!p) return;
+  $('#progressBox').hidden = false;
+  $('#progIntro').textContent = p.intro || '';
+  const box = $('#roleStatus');
+  box.innerHTML = '';
+  for (const r of p.roles || []) {
+    const b = document.createElement('button');
+    b.className = 'rolerow';
+    b.type = 'button';
+    b.innerHTML = '<span class="st"></span><span><b></b><small></small></span>';
+    b.querySelector('.st').className = `st ${r.status}`;
+    b.querySelector('.st').textContent = STATUS[r.status] || r.status;
+    b.querySelector('b').textContent = r.label;
+    b.querySelector('small').textContent = r.note || '';
+    const s = r.story && STORIES.find((x) => x.id === r.story);
+    b.title = s ? `Watch: ${s.title}` : `Open the ${r.label} screens`;
+    b.onclick = () => (s && !WATCH ? play(s) : !WATCH && ROLES[r.id] ? explore(r.id) : null);
+    box.appendChild(b);
+  }
+  const u = (p.updates || [])[0];
+  if (u) {
+    $('#newsTitle').textContent = `What’s new: ${u.title}`;
+    $('#newsList').innerHTML = '';
+    for (const it of u.items || []) { const li = document.createElement('li'); li.textContent = it; $('#newsList').appendChild(li); }
+    $('#newsWhen').textContent = `Updated ${longDate(u.date)}`;
+  }
+}
+
+const version = { loaded: null, timer: null, count: null };
+async function checkVersion() {
+  const v = await fresh('version.json');
+  if (!v) return;
+  if (!version.loaded) {
+    version.loaded = v.builtAt;
+    $('#verPill').hidden = false;
+    $('#verTxt').textContent = `Version ${v.version}`;
+    $('#verWhen').textContent = `Updated ${longDate(v.builtAt)}`;
+    return;
+  }
+  if (v.builtAt === version.loaded || !$('#updBar').hidden) return;
+  // A new version was published while this page was open.
+  $('#updBar').hidden = false;
+  const busy = (story && !run.paused && $('#pauseBtn').disabled === false) || !!live.peer;
+  if (busy || WATCH) { $('#updTxt').textContent = 'A new version of GridKya has been published.'; return; }
+  let n = 15;
+  $('#updTxt').textContent = `A new version of GridKya has been published. Refreshing in ${n} s…`;
+  version.count = setInterval(() => {
+    n--;
+    if (n <= 0) { clearInterval(version.count); location.reload(); }
+    else $('#updTxt').textContent = `A new version of GridKya has been published. Refreshing in ${n} s…`;
+  }, 1000);
+}
+$('#updBtn').onclick = () => location.reload();
+$('#updLater').onclick = () => { clearInterval(version.count); $('#updBar').hidden = true; version.loaded = null; checkVersion(); };
+loadProgress();
+checkVersion();
+version.timer = setInterval(checkVersion, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') checkVersion(); });
 
 window.__sim = { play, stories: STORIES, missing, run, dev: (id) => dev(id), stop, explore };
 

@@ -1,0 +1,29 @@
+{
+  "project": "GridKya",
+  "intro": "GridKya is being built one role at a time. Each role is finished, tested and shown here before the next one starts.",
+  "roles": [
+    { "id": "owner", "label": "Owner", "status": "ready", "note": "Built and tested – ready for your review", "story": "owner" },
+    { "id": "agent", "label": "Managing Agent", "status": "building", "note": "Levies & Payments done (bank statement import and allocation) – rest coming next", "story": "wrongref" },
+    { "id": "estate", "label": "Estate Agent", "status": "planned", "note": "Early demo version – will be rebuilt" },
+    { "id": "trustee", "label": "Trustee", "status": "planned", "note": "Early demo version – will be rebuilt" },
+    { "id": "tenant", "label": "Tenant", "status": "planned", "note": "Early demo version – will be rebuilt" },
+    { "id": "contractor", "label": "Contractor", "status": "planned", "note": "Early demo version – will be rebuilt" }
+  ],
+  "updates": [
+    {
+      "date": "2026-11-24",
+      "title": "Owner role and Levies & Payments",
+      "items": [
+        "New Owner home: levies due across all your units and a “Needs your attention” list",
+        "Every unit has its own unique payment reference (e.g. ACA-P012)",
+        "Managing agent uploads the bank statement (CSV) – payments with the right reference are allocated automatically",
+        "Wrong reference? The owner uploads proof of payment and the agent allocates it by hand",
+        "Owners get a confirmation and a receipt for every allocated payment",
+        "Professional statements with every levy and charge, ready to print or save as PDF",
+        "Debit order form, pre-filled, to print, sign and upload",
+        "My units, My tenants & rent (renewals, deposits) and Income & costs for tax",
+        "Fixes: correct due and overdue dates, tenants no longer see the owner’s levy account, demo data made consistent"
+      ]
+    }
+  ]
+}
