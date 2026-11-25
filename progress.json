@@ -13,6 +13,13 @@
   "updates": [
     {
       "date": "2026-11-25",
+      "title": "Owner: tile renamed to “My Tenant”",
+      "items": [
+        "The owner’s “My tenants & rent” tile, tab and link are now simply “My Tenant”"
+      ]
+    },
+    {
+      "date": "2026-11-25",
       "title": "Roles made clear, and the GridKya Administrator (dréCAR)",
       "items": [
         "New GridKya Administrator role for dréCAR – separate from the managing agent, who is a customer that manages complexes",
