@@ -13,6 +13,17 @@
   "updates": [
     {
       "date": "2026-11-25",
+      "title": "Managing agents’ own branding and documents",
+      "items": [
+        "Each managing agency uploads its logo and sets its colour, address, contact details, registration, VAT and PPRA numbers and a footer",
+        "Every document carries the agency’s letterhead: levy statements, receipts, debit order forms, lease templates and forms, rent invoices, the signed lease, board reports and the estate report – on screen, printed and in Word",
+        "Agencies upload their own documents (lease, forms, letters, policies) once for all their complexes, and choose who sees them: owners, tenants, trustees, contractors or staff",
+        "An agency’s own lease or debit order form replaces GridKya’s standard one for its owners",
+        "Owners see them under Documents; tenants, trustees and contractors in the Documents library"
+      ]
+    },
+    {
+      "date": "2026-11-25",
       "title": "Client demo page",
       "items": [
         "A demo page for potential clients: choose a role and the real app opens signed in as that person – everything works with sample data",
