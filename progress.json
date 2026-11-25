@@ -4,13 +4,31 @@
   "roles": [
     { "id": "platform", "label": "GridKya Administrator (dréCAR)", "status": "ready", "note": "Built and tested – opens and suspends agencies, accounts, subscriptions, system settings and the roles guide", "story": "admin" },
     { "id": "owner", "label": "Owner", "status": "ready", "note": "Built and tested – levies, statements, tenants, property value, home inspection and Ask GridKya", "story": "ownerplus" },
-    { "id": "agent", "label": "Managing Agent", "status": "building", "note": "Levies & Payments done (bank statement import and allocation) – rest coming next", "story": "wrongref" },
-    { "id": "estate", "label": "Estate Agent", "status": "planned", "note": "Early demo version – will be rebuilt" },
-    { "id": "trustee", "label": "Trustee", "status": "planned", "note": "Early demo version – will be rebuilt" },
+    { "id": "agent", "label": "Managing Agent", "status": "ready", "note": "First full version – AI Estate Manager, Estate Health Score, board reports, Levies & Payments, people & approvals; to be refined", "story": "roles" },
+    { "id": "estate", "label": "Estate Agent", "status": "ready", "note": "First full version – listings, leads with Buyer Suitability Score, viewings with gate codes, Instant Estate Report, Heat Map; to be refined", "story": "roles" },
+    { "id": "trustee", "label": "Trustee", "status": "ready", "note": "First full version – Decision Centre, Risk Dashboard, Health Score, digital voting and board reports; to be refined", "story": "roles" },
     { "id": "tenant", "label": "Tenant", "status": "ready", "note": "Built and tested – Landlord & Rent (invoices, proof of payment, signed lease, late notices), Move-In Assistant and Ask GridKya", "story": "rent" },
-    { "id": "contractor", "label": "Contractor", "status": "planned", "note": "Early demo version – will be rebuilt" }
+    { "id": "contractor", "label": "Contractor", "status": "ready", "note": "First full version – work orders, clock in/out on site, before/after photo check, scorecard; to be refined", "story": "roles" }
   ],
   "updates": [
+    {
+      "date": "2026-11-25",
+      "title": "All roles built: managing agent, trustee, estate agent and contractor",
+      "items": [
+        "Managing agent – AI Estate Manager: a morning brief of urgent repairs, escalating complaints, late contractors, owners in arrears, payments to allocate and approvals",
+        "Estate Health Score: security, maintenance, money and compliance, each out of 100, and one overall score – the same for the agent and the trustees",
+        "Board report generator: trustee, financial, maintenance and security reports in one click, ready to print or save as PDF",
+        "Managing agent – People & approvals: add owners, tenants, trustees, contractors, estate agents and colleagues with their own sign-in; approve requests to be linked to a unit (nobody links themself any more)",
+        "The estate manager on site now works in the managing agent’s team (gate, residents, bookings, pets)",
+        "Trustee – Decision Centre: proposals with the cost and saving (find a water leak, hand arrears to attorneys, get quotes before a contract renews, a gate camera); one tap starts a trustee vote, tells the agent and logs the repair",
+        "Trustee – Risk Dashboard: legal matters, insurance, security incidents, water and electricity losses, arrears and contracts, highest risk first",
+        "Estate agent (sales & rentals): listings, leads with a Buyer Suitability Score, viewings, an Instant Estate Report for buyers and an Estate Heat Map",
+        "Owners can ask an accredited estate agent to sell or let their unit and follow views, buyers, viewings and offers",
+        "Viewings send the buyer a one-time gate code and tell the owner and the tenant living in the unit",
+        "Contractor: clock in and out on site (location checked against the estate), before and after photos checked by GridKya, and a Contractor Scorecard ranked automatically – also seen by the agent and trustees",
+        "Server rules for every new link, plus fixes: visitor codes, contractor completion photos, and estate agents can never see residents’ chats or money"
+      ]
+    },
     {
       "date": "2026-11-25",
       "title": "Tenant role, and owner ↔ tenant rent and lease",

@@ -213,7 +213,8 @@ body.watch #tryBtn{display:inline-block}
 /* ───────────────────────── the roles ───────────────────────── */
 const ROLES = {
   agent:      { label: 'Managing Agent', who: 'Pieter',  kind: 'laptop' },
-  estate:     { label: 'Estate Agent',   who: 'Naledi',  kind: 'laptop' },
+  estate:     { label: 'Estate Agent',   who: 'Zanele',  kind: 'laptop' },
+  office:     { label: 'Estate manager', who: 'Naledi',  kind: 'laptop' },
   trustee:    { label: 'Trustee',        who: 'Ravi',    kind: 'laptop' },
   owner:      { label: 'Owner',          who: 'Lindiwe', kind: 'phone' },
   tenant:     { label: 'Tenant',         who: 'Thandi',  kind: 'phone' },
@@ -598,8 +599,8 @@ const STORIES = [
       }],
       ['Estate Agent', async () => {
         await A('lap').swap('estate');
-        await say('lap', 'The estate agent works from the estate office: the gate, visitors, alarms, residents and the daily running of the complex.');
-        await A('lap').go('g/security');
+        await say('lap', 'The estate agent sells and lets units: listings, leads with a Buyer Suitability Score, viewings with a gate code, and an Instant Estate Report for buyers.');
+        await A('lap').go('sales/listings');
         await sleep(900);
       }],
       ['Trustee', async () => {
@@ -693,7 +694,7 @@ const STORIES = [
   },
   {
     id: 'visitor', title: 'A visitor at the gate', blurb: 'The tenant creates a one-time code; security checks it and the gate opens.',
-    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'estate' }],
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'office' }],
     reset: true,
     chapters: [
       ['Tenant creates a code', async () => {
@@ -726,7 +727,7 @@ const STORIES = [
   },
   {
     id: 'panic', title: 'Panic button', blurb: 'A resident presses and holds; the guardhouse knows the unit instantly.',
-    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'estate' }],
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'lap', role: 'office' }],
     reset: true,
     chapters: [
       ['Resident calls for help', async () => {
@@ -972,7 +973,68 @@ const STORIES = [
     ],
   },
   {
-    id: 'rent', title: 'NEW · Tenant & landlord: rent, proof of payment and the lease', blurb: 'Rent is late after the 10th, the tenant uploads proof, the owner accepts it. The signed lease, owner documents, Move-In Assistant and an owner who lives in.',
+    id: 'roles', title: 'NEW · Managing agent, trustee, estate agent and contractor', blurb: 'The AI Estate Manager and Health Score, a one-tap trustee decision, the Risk Dashboard and board report, an estate agent booking a viewing, and a contractor clocking in on site.',
+    devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'trustee', kind: 'phone' }],
+    reset: true,
+    chapters: [
+      ['AI Estate Manager', async () => {
+        const lap = A('lap');
+        await lap.go('insights/brief');
+        await say('lap', 'Every morning the managing agent gets a brief: urgent repairs, escalating complaints, late contractors and owners in arrears – worked out overnight from the estate’s own records.');
+      }],
+      ['Estate Health Score', async () => {
+        const lap = A('lap');
+        await lap.go('insights/health');
+        await say('lap', 'Security, maintenance, money and compliance, each out of 100, give one Estate Health Score. The trustees see exactly the same score.');
+      }],
+      ['Trustee Decision Centre', async () => {
+        const ph = A('ph');
+        await ph.go('insights/decisions');
+        await say('ph', 'Ravi, a trustee, gets proposals with the money involved. Water use is up sharply, so GridKya proposes finding the leak. One tap approves it and starts a trustee vote.');
+        await ph.click('Approve');
+      }],
+      ['The agent already has it', async () => {
+        const lap = A('lap');
+        await lap.go('maintenance');
+        await say('lap', 'The managing agent is told about the vote, and the leak repair is already on the job board.');
+      }],
+      ['Risk Dashboard', async () => {
+        const ph = A('ph');
+        await ph.go('insights/risks');
+        await say('ph', 'The Risk Dashboard: legal matters, insurance expiring, security incidents, water losses and arrears, highest risk first.');
+      }],
+      ['Board report in one click', async () => {
+        const lap = A('lap');
+        await lap.go('insights/board');
+        await lap.click('Generate board report');
+        await say('lap', 'Trustee, financial, maintenance and security reports in one document, ready to print or save as PDF.');
+      }],
+      ['Estate agent', async () => {
+        const lap = A('lap');
+        await lap.swap('estate');
+        await lap.go('sales/leads');
+        await say('lap', 'Zanele, an estate agent, sells and lets units in the estate. Every lead gets a Buyer Suitability Score: budget and levy, space, pets, security and family amenities.');
+        await lap.go('sales/viewings');
+        await lap.click('Book a viewing');
+        await lap.click(/^Book & send/);
+        await say('lap', 'Booking a viewing sends the buyer a one-time gate code and tells the owner – and the tenant, if the unit is let.');
+        await lap.go('sales/heatmap');
+        await say('lap', 'The Estate Heat Map shows which units get the most attention, market activity and the price trend.');
+      }],
+      ['Contractor on site', async () => {
+        const ph = A('ph');
+        await ph.swap('contractor');
+        await ph.go('contractor/jobs/tkt_1');
+        await say('ph', 'The plumber clocks in when he arrives. His phone’s location is checked against the estate.');
+        await ph.click('Demo: I am at the estate');
+        await ph.go('contractor/scorecard');
+        await say('ph', 'Before and after photos are checked, and every contractor has a scorecard – speed, quality, cost and complaints – ranked automatically.');
+        await say(null, 'Every role, one estate: what one person does reaches everyone it affects.');
+      }],
+    ],
+  },
+  {
+    id: 'rent', title: 'Tenant & landlord: rent, proof of payment and the lease', blurb: 'Rent is late after the 10th, the tenant uploads proof, the owner accepts it. The signed lease, owner documents, Move-In Assistant and an owner who lives in.',
     devices: [{ id: 'ph', role: 'tenant' }, { id: 'own', role: 'owner' }],
     reset: true,
     chapters: [
