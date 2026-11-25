@@ -13,6 +13,16 @@
   "updates": [
     {
       "date": "2026-11-25",
+      "title": "Full platform check",
+      "items": [
+        "Every page for every role was opened automatically – about 600 pages on a laptop and again at phone size – checking for errors, dead links, locked pages and screens that are too wide",
+        "All 15 guided stories were replayed end to end to test the buttons, forms and cross-role links",
+        "Fixed: a trustee link to the owner register (staff only), the estate agent’s phone menu bar and Estate information, the administrator’s Overview tab, and the repair story for before/after photos",
+        "Code clean-up: unused code removed and one wrongly named function fixed"
+      ]
+    },
+    {
+      "date": "2026-11-25",
       "title": "Managing agents’ own branding and documents",
       "items": [
         "Each managing agency uploads its logo and sets its colour, address, contact details, registration, VAT and PPRA numbers and a footer",

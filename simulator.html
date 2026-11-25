@@ -573,7 +573,12 @@ function api(id) {
       doc.dispatchEvent(new (win().KeyboardEvent)('keydown', { key: 'Escape', bubbles: true }));
       await sleep(500);
     },
-    swap(role) { swapRole(id, role); return sleep(2200); },
+    // switch this device to another role and wait until the app has really opened there
+    async swap(role) {
+      swapRole(id, role);
+      await waitFor(() => { try { return d().frame.contentDocument?.querySelector('.shell main'); } catch (e) { return null; } }, 20000);
+      await sleep(1200);
+    },
   };
   return o;
 }
@@ -661,9 +666,12 @@ const STORIES = [
       ['Contractor does the work', async () => {
         const ct = A('ct');
         await ct.go('contractor/jobs/tkt_1');
-        await say('ct', 'The plumber sees only his own jobs on his phone. He starts the work…');
+        await say('ct', 'The plumber sees only his own jobs on his phone. He clocks in on site – his location is checked against the estate…');
+        await ct.click('Demo: I am at the estate');
+        await say('ct', '…takes a before photo of the leak and starts the work…');
+        await ct.photo();
         await ct.click(/I’ve started/);
-        await say('ct', '…uploads a photo as proof, adds a note and marks the job complete.');
+        await say('ct', '…then an after photo, a note, and marks the job complete. GridKya checks the before and after photos.');
         await ct.photo();
         await ct.fill('Note for the estate', 'Valve replaced and tested for 30 minutes. No leaks.');
         await ct.click('Mark complete');
