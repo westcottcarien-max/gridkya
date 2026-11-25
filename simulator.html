@@ -219,6 +219,7 @@ const ROLES = {
   tenant:     { label: 'Tenant',         who: 'Thandi',  kind: 'phone' },
   contractor: { label: 'Contractor',     who: 'Sizwe',   kind: 'phone' },
   platform:   { label: 'GridKya Administrator', who: 'dréCAR', kind: 'laptop' },
+  homeowner:  { label: 'Owner who lives in', who: 'Ravi',  kind: 'phone' },
 };
 const $ = (s) => document.querySelector(s);
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -751,7 +752,7 @@ const STORIES = [
     ],
   },
   {
-    id: 'admin', title: 'NEW · Who gives access to whom: the GridKya Administrator', blurb: 'dréCAR opens a managing agency, suspends and reactivates one, and why nobody can sign themselves up.',
+    id: 'admin', title: 'Who gives access to whom: the GridKya Administrator', blurb: 'dréCAR opens a managing agency, suspends and reactivates one, and why nobody can sign themselves up.',
     devices: [{ id: 'lap', role: 'platform' }, { id: 'ph', role: 'owner' }],
     reset: true,
     chapters: [
@@ -971,28 +972,59 @@ const STORIES = [
     ],
   },
   {
-    id: 'levy', title: 'Rent arrears', blurb: 'The owner loads a tenant’s arrears; the tenant sees it; the agent sees collections.',
-    devices: [{ id: 'ph', role: 'owner' }, { id: 'ph2', role: 'tenant' }, { id: 'lap', role: 'agent' }],
+    id: 'rent', title: 'NEW · Tenant & landlord: rent, proof of payment and the lease', blurb: 'Rent is late after the 10th, the tenant uploads proof, the owner accepts it. The signed lease, owner documents, Move-In Assistant and an owner who lives in.',
+    devices: [{ id: 'ph', role: 'tenant' }, { id: 'own', role: 'owner' }],
     reset: true,
     chapters: [
-      ['Owner loads tenant arrears', async () => {
+      ['Landlord & Rent', async () => {
         const ph = A('ph');
-        await ph.go('owner/rentals');
-        await say('ph', 'Thandi rents Lindiwe’s unit in Protea 12. When rent falls behind, Lindiwe can load the arrears on Thandi’s rent account.');
-        await ph.click('Load arrears');
-        await ph.fill('Amount (R)', '9800');
-        await ph.click('Load arrears');
-        await sleep(700);
+        await ph.go('payments');
+        await say('ph', 'Thandi rents Protea 12 from Lindiwe. Everything about her landlord and rent is under one tile: Landlord & Rent.');
+        await say('ph', 'Rent is due on the 1st. November’s invoice was not paid by the 10th, so GridKya told her automatically that it is late – and told Lindiwe too.');
       }],
-      ['Tenant sees what is owed', async () => {
-        const t = A('ph2');
-        await t.go('payments/rent');
-        await say('ph2', 'Thandi sees exactly what she owes and can pay securely in the app.');
+      ['Tenant uploads proof of payment', async () => {
+        const ph = A('ph');
+        await ph.go('payments/proof');
+        await say('ph', 'Thandi paid by EFT this morning. She uploads the proof of payment.');
+        await ph.fill('Amount paid (R)', '9800');
+        await ph.fill('Note (optional)', 'November rent');
+        await ph.attach('Proof of payment', 'rent-proof-of-payment.png');
+        await ph.click('Send proof of payment');
       }],
-      ['Agent sees collections', async () => {
-        const lap = A('lap');
-        await lap.go('finance/collections');
-        await say('lap', 'The managing agent sees levies, arrears and collection progress for the whole complex.');
+      ['Owner checks it', async () => {
+        const own = A('own');
+        await own.go('owner/rentals');
+        await say('own', 'Lindiwe is notified. In My Tenant she sees the proof, checks her bank account and accepts it.');
+        await own.click('Check');
+        await own.click(/^Accept/);
+      }],
+      ['Paid up', async () => {
+        const ph = A('ph');
+        await ph.go('payments');
+        await say('ph', 'Thandi is told at once, and her rent account shows paid. Owner and tenant always see exactly the same invoices and statement.');
+      }],
+      ['The signed lease, on both sides', async () => {
+        const ph = A('ph'), own = A('own');
+        await ph.go('payments/contract');
+        await say('ph', 'The signed rental contract is on Thandi’s profile…');
+        await own.go('owner/rentals');
+        await say('own', '…and on Lindiwe’s, under My Tenant, with both signatures. An owner can also upload a lease signed on paper.');
+      }],
+      ['Owner documents', async () => {
+        const own = A('own');
+        await own.go('owner/documents');
+        await say('own', 'Documents gives owners a rental contract template, already filled in with their details, plus every form they need: application, inspections, deposit refund, notice, letter of demand and levy clearance.');
+      }],
+      ['Move-In Assistant', async () => {
+        const ph = A('ph');
+        await ph.go('tenant/move-in');
+        await say('ph', 'New tenants get a Move-In Assistant: lease, inspection, access tags, vehicles, meter readings, pets and the rules – it ticks itself as things get done.');
+      }],
+      ['An owner who lives in', async () => {
+        const own = A('own');
+        await own.swap('homeowner');
+        await say('own', 'Ravi owns Protea 3 and lives in it. Besides his owner tiles he gets everything a resident has: visitor codes, gate pass, the emergency button, bookings, meters and the Move-In Assistant.');
+        await say(null, 'Owner, tenant and managing agent – one rent account, one lease, no arguments.');
       }],
     ],
   },

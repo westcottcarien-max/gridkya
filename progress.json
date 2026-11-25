@@ -7,10 +7,27 @@
     { "id": "agent", "label": "Managing Agent", "status": "building", "note": "Levies & Payments done (bank statement import and allocation) – rest coming next", "story": "wrongref" },
     { "id": "estate", "label": "Estate Agent", "status": "planned", "note": "Early demo version – will be rebuilt" },
     { "id": "trustee", "label": "Trustee", "status": "planned", "note": "Early demo version – will be rebuilt" },
-    { "id": "tenant", "label": "Tenant", "status": "planned", "note": "Early demo version – will be rebuilt" },
+    { "id": "tenant", "label": "Tenant", "status": "ready", "note": "Built and tested – Landlord & Rent (invoices, proof of payment, signed lease, late notices), Move-In Assistant and Ask GridKya", "story": "rent" },
     { "id": "contractor", "label": "Contractor", "status": "planned", "note": "Early demo version – will be rebuilt" }
   ],
   "updates": [
+    {
+      "date": "2026-11-25",
+      "title": "Tenant role, and owner ↔ tenant rent and lease",
+      "items": [
+        "Owner – My Tenant: rent invoices the owner sends (rent, water & electricity, fees), with Paid / Due / Late on each",
+        "Tenant – Landlord & Rent: the same invoices and statement, proof-of-payment upload, the signed lease and the landlord’s details",
+        "Tenant uploads proof of payment; the owner checks it and accepts it (or says why not) – the rent account updates for both",
+        "Automatic late notices: rent is due on the 1st; if it is not paid by the 10th the tenant is told, and so is the owner",
+        "The signed rental contract shows on both the owner’s and the tenant’s profile; owners can also upload a lease signed on paper",
+        "New owner tile: Documents – a rental contract template filled in with the owner’s details, and application, inspection, deposit refund, renewal, notice, letter of demand and levy clearance forms",
+        "Move-In Assistant for new residents: lease, inspection, access tags, vehicles, meter readings, pets, internet and rules – it ticks itself as things get done",
+        "Owners who live in their own unit get everything a resident tenant has (visitor codes, gate pass, emergency button, bookings, meters), and can say “I live here” on My units",
+        "Managing agent: bills only the tenants of owners who are not on GridKya, and checks their proof of payment; new leases are signed by both tenant and owner",
+        "New estate forms: access application (tags and remotes) and pet application",
+        "The same rules are enforced on the server, including a daily late-rent check"
+      ]
+    },
     {
       "date": "2026-11-25",
       "title": "Owner: tile renamed to “My Tenant”",
