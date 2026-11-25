@@ -11,6 +11,19 @@
   ],
   "updates": [
     {
+      "date": "2026-11-25",
+      "title": "GridKya server built – ready to run on our own server",
+      "items": [
+        "Real shared data: everyone sees the same accounts instead of demo data on each phone",
+        "Sign-in PINs are created and checked by the server",
+        "Privacy rules on the server: owners only ever receive their own units’ data; nobody but the managing agent can change levy accounts",
+        "Live updates: a change by one person reaches everyone else within seconds, and the app still works offline",
+        "Free AI on our own server for Ask GridKya and home-inspection photos, with daily limits",
+        "Nightly backups, and data kept in South Africa (Johannesburg) – good for POPIA",
+        "Next: install it on the server, then connect the app"
+      ]
+    },
+    {
       "date": "2026-11-24",
       "title": "Owner: every Levies & Payments requirement checked end to end",
       "items": [
