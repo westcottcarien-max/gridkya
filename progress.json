@@ -13,6 +13,19 @@
   "updates": [
     {
       "date": "2026-11-25",
+      "title": "Everything needed to run a complex – working for real",
+      "items": [
+        "Month-end billing: one step bills every unit its levy; running it again never bills anyone twice",
+        "Meter readings and utility billing: sub-metered water and electricity billed per unit from the opening and closing readings, at the municipal tariff with VAT",
+        "Levy clearance certificates for sales, worked out to the month of transfer and printed on the agency’s letterhead",
+        "Taking on a complex: import units, owners, tenants and opening balances from a spreadsheet, checked row by row first",
+        "Online payments with PayFast (card and instant EFT): the server works out what is owed, PayFast confirms the payment, and it lands on the owner’s levy account or the tenant’s rent account with a receipt",
+        "Real email (Brevo) and WhatsApp (Meta) sending, switched on with the server settings",
+        "Daily reminders now run on the server by themselves: levy reminders and overdue notices, meeting reminders, lease expiry, certificates and contracts expiring, overdue planned maintenance and contractor insurance – each sent once"
+      ]
+    },
+    {
+      "date": "2026-11-25",
       "title": "Full platform check",
       "items": [
         "Every page for every role was opened automatically – about 600 pages on a laptop and again at phone size – checking for errors, dead links, locked pages and screens that are too wide",

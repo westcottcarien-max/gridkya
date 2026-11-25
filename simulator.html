@@ -981,7 +981,41 @@ const STORIES = [
     ],
   },
   {
-    id: 'roles', title: 'NEW · Managing agent, trustee, estate agent and contractor', blurb: 'The AI Estate Manager and Health Score, a one-tap trustee decision, the Risk Dashboard and board report, an estate agent booking a viewing, and a contractor clocking in on site.',
+    id: 'monthend', title: 'NEW · Month-end: levy run, meter billing, clearance and taking on a complex', blurb: 'The managing agent bills every unit in one step, bills water from meter readings, issues a levy clearance certificate and imports a complex from a spreadsheet.',
+    devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'owner' }],
+    reset: true,
+    chapters: [
+      ['Bill every unit', async () => {
+        const lap = A('lap');
+        await lap.go('finance/levies');
+        await say('lap', 'Month-end: one step bills every unit its levy for next month, with the due date. Running it again never bills anyone twice.');
+        await lap.click(/^Bill levies for/, { twice: true });
+      }],
+      ['The owner sees it at once', async () => {
+        const ph = A('ph');
+        await ph.go('payments/statement');
+        await say('ph', 'Lindiwe is notified, and the new levy is already on her statement – on the managing agent’s letterhead.');
+      }],
+      ['Water from meter readings', async () => {
+        const lap = A('lap');
+        await lap.go('finance/levies');
+        await say('lap', 'Sub-metered water and electricity: enter the closing readings (residents’ own readings appear automatically), and GridKya bills each unit at the municipal tariff, with VAT.');
+      }],
+      ['Levy clearance certificate', async () => {
+        const lap = A('lap');
+        await lap.go('payments/clearance');
+        await say('lap', 'A unit is sold. GridKya works out what must be paid before transfer and prints the clearance certificate for the conveyancer.');
+      }],
+      ['Taking on a new complex', async () => {
+        const lap = A('lap');
+        await lap.go('people/import');
+        await say('lap', 'Taking on a complex? Download the template, fill it from Excel or the old system, and import units, owners, tenants and opening balances – checked row by row first.');
+        await say(null, 'Month-end that used to take days now takes minutes.');
+      }],
+    ],
+  },
+  {
+    id: 'roles', title: 'Managing agent, trustee, estate agent and contractor', blurb: 'The AI Estate Manager and Health Score, a one-tap trustee decision, the Risk Dashboard and board report, an estate agent booking a viewing, and a contractor clocking in on site.',
     devices: [{ id: 'lap', role: 'agent' }, { id: 'ph', role: 'trustee', kind: 'phone' }],
     reset: true,
     chapters: [
