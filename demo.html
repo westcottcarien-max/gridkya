@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>GridKya Demo</title>
+<meta name="description" content="Try GridKya – the property operating system for estates and complexes – as a managing agent, trustee, owner, tenant, estate agent or contractor." />
+<meta property="og:title" content="GridKya – try the demo" />
+<meta property="og:description" content="One app for the whole estate. Try it as any role – everything works, with sample data." />
+<meta property="og:image" content="./og-image.jpg" />
+<link rel="icon" type="image/png" href="./icons/favicon.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0906; --panel: #15110b; --panel-2: #1d170f; --line: rgba(242, 182, 50, 0.22);
+    --ink: #fff7e6; --ink-2: #d9ccb2; --ink-3: #a3957c; --gold: #f8c13a; --gold-2: #c98a12; --sage: #3bb273;
+  }
+  :root[data-theme="light"] {
+    --bg: #fbf7ef; --panel: #ffffff; --panel-2: #f6efe1; --line: rgba(168, 115, 10, 0.25);
+    --ink: #1b1405; --ink-2: #4a3f2b; --ink-3: #7a6b52; --gold: #b07a0c; --gold-2: #8a5d06;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: var(--bg); color: var(--ink); font: 16px/1.55 Inter, system-ui, sans-serif; }
+  a { color: inherit; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+  header.top { display: flex; align-items: center; gap: 14px; padding: 18px 0; }
+  .logo { width: 60px; height: 60px; background: #fff; border-radius: 12px; padding: 3px; flex: none; }
+  .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .top strong { font-family: Sora, sans-serif; font-size: 1.25rem; }
+  .top small { display: block; color: var(--ink-3); font-size: 0.8rem; }
+  .top .spacer { flex: 1; }
+  .btn { display: inline-flex; align-items: center; gap: 8px; border-radius: 999px; padding: 11px 18px; font-weight: 600; text-decoration: none; border: 1px solid var(--line); background: transparent; color: var(--ink); cursor: pointer; font: inherit; font-weight: 600; }
+  .btn.gold { background: linear-gradient(135deg, var(--gold), var(--gold-2)); color: #1b1405; border: 0; }
+  .btn:hover { filter: brightness(1.08); }
+  .hero { padding: 36px 0 26px; display: grid; gap: 18px; }
+  .kicker { color: var(--gold); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem; font-weight: 700; margin: 0; }
+  h1 { font-family: Sora, sans-serif; font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.08; margin: 0; max-width: 18ch; }
+  h1 em { font-style: normal; color: var(--gold); }
+  .lead { color: var(--ink-2); font-size: 1.08rem; max-width: 62ch; margin: 0; }
+  .row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  .note { font-size: 0.82rem; color: var(--ink-3); }
+  h2 { font-family: Sora, sans-serif; font-size: 1.45rem; margin: 40px 0 6px; }
+  .sub { color: var(--ink-3); margin: 0 0 16px; }
+  .roles { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+  .role { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; text-decoration: none; transition: transform 0.15s, border-color 0.15s; }
+  .role:hover { transform: translateY(-2px); border-color: var(--gold); }
+  .role img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--panel-2); }
+  .role-body { padding: 14px 16px 16px; display: grid; gap: 6px; flex: 1; }
+  .role h3 { margin: 0; font-family: Sora, sans-serif; font-size: 1.08rem; }
+  .role .who { color: var(--gold); font-size: 0.8rem; font-weight: 600; }
+  .role ul { margin: 4px 0 0; padding-left: 18px; color: var(--ink-2); font-size: 0.88rem; }
+  .role .go { margin-top: auto; padding-top: 10px; font-weight: 700; color: var(--gold); font-size: 0.9rem; }
+  .tours { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+  .tour { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; text-decoration: none; display: grid; gap: 4px; }
+  .tour:hover { border-color: var(--gold); }
+  .tour strong { font-family: Sora, sans-serif; }
+  .tour span { color: var(--ink-2); font-size: 0.88rem; }
+  .tour em { color: var(--gold); font-style: normal; font-size: 0.8rem; font-weight: 700; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+  .fact { background: var(--panel-2); border-radius: 14px; padding: 14px 16px; font-size: 0.9rem; color: var(--ink-2); }
+  .fact b { display: block; color: var(--ink); margin-bottom: 2px; }
+  footer { margin: 48px 0 30px; padding-top: 18px; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; color: var(--ink-3); font-size: 0.85rem; }
+  footer img { height: 30px; background: #fff; border-radius: 6px; padding: 3px 6px; vertical-align: middle; }
+  .toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--panel); border: 1px solid var(--gold); color: var(--ink); padding: 10px 16px; border-radius: 14px; font-size: 0.9rem; width: max-content; max-width: 90vw; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
+  .toast.show { opacity: 1; }
+  .btn-sm { padding: 8px 14px; font-size: 0.85rem; }
+  @media (max-width: 420px) { .top small { display: none; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <span class="logo"><img src="./brand/gridkya-logo-full.png" alt="GridKya – Simplifying Smart Community Living" /></span>
+    <span><strong>GridKya</strong><small>The property operating system for estates</small></span>
+    <span class="spacer"></span>
+    <button class="btn btn-sm" id="reset" type="button" title="Start again with fresh sample data">Reset demo</button>
+  </header>
+
+  <section class="hero">
+    <p class="kicker">Live demo · sample estate</p>
+    <h1>One app for the <em>whole estate</em>. Try it as anyone.</h1>
+    <p class="lead">Acacia Gardens Estate is a sample complex with 24 units, owners, tenants, a managing agent, trustees, an estate agent and contractors. Pick a role below – everything works: levies, statements, rent, repairs, votes, viewings and the gate.</p>
+    <div class="row">
+      <a class="btn gold" href="./index.html?nosplash#manager">Start as the managing agent →</a>
+      <a class="btn" href="./simulator.html?story=meet">Watch a 2-minute tour</a>
+    </div>
+    <p class="note">No sign-up and no cellphone number needed. Nothing you do is sent anywhere – it stays in this browser, and “Reset demo” starts fresh.</p>
+  </section>
+
+  <h2>Choose a role</h2>
+  <p class="sub">Each opens the real app, signed in as a sample person. Use “Switch” in the app to change role at any time.</p>
+  <div class="roles">
+    <a class="role" href="./index.html?nosplash#manager">
+      <img src="./tiles/managing-agent.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Pieter · Kya Property Managers</span>
+        <h3>Managing Agent</h3>
+        <ul>
+          <li>AI Estate Manager morning brief and Estate Health Score</li>
+          <li>Import the bank statement – payments allocate themselves</li>
+          <li>Repairs, contractors, meetings and a one-click board report</li>
+        </ul>
+        <span class="go">Open as Pieter →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#trustee">
+      <img src="./tiles/trustee.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Ravi · trustee and owner</span>
+        <h3>Trustee</h3>
+        <ul>
+          <li>Decision Centre – approve proposals with one tap</li>
+          <li>Risk Dashboard: legal, insurance, security, water losses</li>
+          <li>Finances, budget, digital trustee votes</li>
+        </ul>
+        <span class="go">Open as Ravi →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#owner">
+      <img src="./tiles/owner.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Lindiwe · owns two units and lets both</span>
+        <h3>Owner</h3>
+        <ul>
+          <li>Levies, statements, receipts and the debit order form</li>
+          <li>My Tenant: rent invoices, proof of payment, signed lease</li>
+          <li>Property value, home inspection, documents, sell or let</li>
+        </ul>
+        <span class="go">Open as Lindiwe →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#tenant">
+      <img src="./tiles/tenant.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Thandi · rents Protea 12</span>
+        <h3>Tenant</h3>
+        <ul>
+          <li>Landlord & Rent: invoices, proof of payment, the lease</li>
+          <li>Visitor gate codes and the emergency button</li>
+          <li>Move-In Assistant, repairs and bookings</li>
+        </ul>
+        <span class="go">Open as Thandi →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#estate">
+      <img src="./tiles/estate-agent.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Zanele · Jacaranda Realty</span>
+        <h3>Estate Agent</h3>
+        <ul>
+          <li>Listings and leads with a Buyer Suitability Score</li>
+          <li>Viewings with a one-time gate code</li>
+          <li>Instant Estate Report and Estate Heat Map</li>
+        </ul>
+        <span class="go">Open as Zanele →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#contractor">
+      <img src="./tiles/contractor.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Sizwe · AquaFix Plumbing</span>
+        <h3>Contractor</h3>
+        <ul>
+          <li>Work orders, quotes and invoices</li>
+          <li>Clock in on site, before and after photos</li>
+          <li>Their own Contractor Scorecard</li>
+        </ul>
+        <span class="go">Open as Sizwe →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#homeowner">
+      <img src="./tiles/acacia-gardens-estate.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Ravi · lives in Protea 3</span>
+        <h3>Owner who lives in</h3>
+        <ul>
+          <li>Everything an owner has</li>
+          <li>Plus visitor codes, gate pass, bookings and meters</li>
+        </ul>
+        <span class="go">Open as Ravi →</span>
+      </div>
+    </a>
+    <a class="role" href="./index.html?nosplash#office">
+      <img src="./tiles/estate-overview.webp" alt="" loading="lazy" />
+      <div class="role-body">
+        <span class="who">Naledi · estate manager on site</span>
+        <h3>Estate office</h3>
+        <ul>
+          <li>Gate check, visitors, panic alerts and incidents</li>
+          <li>Residents, groups, bookings, forms and approvals</li>
+        </ul>
+        <span class="go">Open as Naledi →</span>
+      </div>
+    </a>
+  </div>
+
+  <h2>Guided tours</h2>
+  <p class="sub">Watch several people use GridKya at the same time – what one does appears for the others instantly. Narrated, about 2–3 minutes each.</p>
+  <div class="tours">
+    <a class="tour" href="./simulator.html?story=roles"><strong>The whole estate in one tour</strong><span>AI morning brief, a one-tap trustee decision, an estate agent booking a viewing, a contractor on site.</span><em>Watch →</em></a>
+    <a class="tour" href="./simulator.html?story=wrongref"><strong>Levies: bank statement to receipt</strong><span>The agent uploads the bank statement, payments allocate themselves, the owner gets a receipt.</span><em>Watch →</em></a>
+    <a class="tour" href="./simulator.html?story=rent"><strong>Tenant and landlord</strong><span>Late rent, proof of payment, the signed lease and the Move-In Assistant.</span><em>Watch →</em></a>
+    <a class="tour" href="./simulator.html?story=ownerplus"><strong>The owner’s home</strong><span>Property value, a home inspection that spots a roof leak, and Ask GridKya.</span><em>Watch →</em></a>
+    <a class="tour" href="./simulator.html?story=leak"><strong>A leak, from report to payment</strong><span>Tenant reports, agent approves a quote, contractor fixes it and is paid.</span><em>Watch →</em></a>
+    <a class="tour" href="./simulator.html?story=visitor"><strong>A visitor at the gate</strong><span>A one-time code from the tenant’s phone, checked at the gate.</span><em>Watch →</em></a>
+  </div>
+
+  <h2>Good to know</h2>
+  <div class="facts">
+    <div class="fact"><b>Sample data</b>The estate, people and figures are made up. Nothing is sent – no SMS, email or payments leave the demo.</div>
+    <div class="fact"><b>Saved in your browser</b>What you do stays in this browser until you press “Reset demo”. Each person who opens the link has their own copy.</div>
+    <div class="fact"><b>Works on any device</b>Phone, tablet or laptop. On a phone, add it to your home screen to use it like an app.</div>
+    <div class="fact"><b>Your own estate</b>For a pilot, your complexes run on GridKya’s own server in South Africa, with real sign-in by cellphone PIN.</div>
+  </div>
+
+  <footer>
+    <span>GridKya · Manage · Monitor · Maintain</span>
+    <span>Designed by <a href="https://www.drecar.co.za" target="_blank" rel="noreferrer"><img src="./brand/drecar-logo-sm.png" alt="dréCAR Software Developers" /></a></span>
+  </footer>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+  (function () {
+    var btn = document.getElementById('reset');
+    var toast = document.getElementById('toast');
+    btn.addEventListener('click', function () {
+      try {
+        var keys = [];
+        for (var i = 0; i < localStorage.length; i++) { var k = localStorage.key(i); if (k && k.indexOf('gridkya') === 0) keys.push(k); }
+        keys.forEach(function (k) { localStorage.removeItem(k); });
+        toast.textContent = 'Demo reset – fresh sample data next time you open a role.';
+      } catch (e) {
+        toast.textContent = 'Could not reset – your browser blocks storage.';
+      }
+      toast.classList.add('show');
+      setTimeout(function () { toast.classList.remove('show'); }, 2600);
+    });
+  })();
+</script>
+</body>
+</html>

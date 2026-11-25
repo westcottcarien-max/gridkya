@@ -13,6 +13,15 @@
   "updates": [
     {
       "date": "2026-11-25",
+      "title": "Client demo page",
+      "items": [
+        "A demo page for potential clients: choose a role and the real app opens signed in as that person – everything works with sample data",
+        "Guided tours for the whole estate, levies, tenant & landlord, the owner, a repair and the gate",
+        "“Reset demo” starts again with fresh sample data"
+      ]
+    },
+    {
+      "date": "2026-11-25",
       "title": "All roles built: managing agent, trustee, estate agent and contractor",
       "items": [
         "Managing agent – AI Estate Manager: a morning brief of urgent repairs, escalating complaints, late contractors, owners in arrears, payments to allocate and approvals",
