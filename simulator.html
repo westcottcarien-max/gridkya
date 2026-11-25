@@ -218,6 +218,7 @@ const ROLES = {
   owner:      { label: 'Owner',          who: 'Lindiwe', kind: 'phone' },
   tenant:     { label: 'Tenant',         who: 'Thandi',  kind: 'phone' },
   contractor: { label: 'Contractor',     who: 'Sizwe',   kind: 'phone' },
+  platform:   { label: 'GridKya Administrator', who: 'dréCAR', kind: 'laptop' },
 };
 const $ = (s) => document.querySelector(s);
 const delay = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -750,7 +751,55 @@ const STORIES = [
     ],
   },
   {
-    id: 'ownerplus', title: 'NEW · Owner: value, home inspection and Ask GridKya', blurb: 'What her unit is worth against the estate, a home inspection that spots a roof leak, and instant answers.',
+    id: 'admin', title: 'NEW · Who gives access to whom: the GridKya Administrator', blurb: 'dréCAR opens a managing agency, suspends and reactivates one, and why nobody can sign themselves up.',
+    devices: [{ id: 'lap', role: 'platform' }, { id: 'ph', role: 'owner' }],
+    reset: true,
+    chapters: [
+      ['Who does what', async () => {
+        const lap = A('lap');
+        await lap.go('platform/roles');
+        await say('lap', 'GridKya has one clear chain of access. dréCAR, the GridKya Administrator, opens each managing agency. The agency adds everyone else.');
+        await say('lap', 'Every role says what it may do and who gives it access. Nobody can sign themselves up or choose their own role.');
+      }],
+      ['Open a new agency', async () => {
+        const lap = A('lap');
+        await lap.go('platform/agencies');
+        await say('lap', 'A new managing agency signs up. dréCAR opens it with its first managing agent – here on a 30-day free trial.');
+        await lap.click('Open a new agency');
+        await lap.fill('Agency name', 'Jacaranda Property Management');
+        await lap.fill('Full name', 'Sam Mokoena');
+        await lap.fill('Cellphone number', '0835551234');
+        await lap.click('Open agency');
+        await say('lap', 'Sam can now sign in with his own cellphone number and add the agency’s complexes, colleagues, owners, tenants, trustees and contractors.');
+      }],
+      ['Suspend an agency', async () => {
+        const lap = A('lap');
+        await lap.go('platform/agencies/agc_kya');
+        await say('lap', 'If an agency stops paying, dréCAR can suspend it. The reason is kept in the activity log.');
+        await lap.click('Suspend');
+        await lap.fill('Reason', 'Demo: subscription unpaid');
+        await lap.click('Suspend agency');
+        await A('ph').go('');
+        await say('ph', 'Lindiwe, an owner in one of that agency’s complexes, cannot open GridKya while it is suspended. Nothing is deleted.');
+      }],
+      ['Reactivate', async () => {
+        const lap = A('lap');
+        await lap.go('platform/agencies/agc_kya');
+        await lap.click('Reactivate', { twice: true });
+        await A('ph').go('');
+        await say('ph', 'Reactivated – everyone is back in at once, with all their data.');
+      }],
+      ['Privacy', async () => {
+        const lap = A('lap');
+        await lap.go('platform/people');
+        await say('lap', 'dréCAR sees who can sign in, to help people and block misuse – never levy accounts, residents’ records or messages. An agency can allow support access for 7 days when it needs help.');
+        await lap.go('platform/log');
+        await say(null, 'Every action is logged. One clear chain: dréCAR → managing agency → everyone in its complexes.');
+      }],
+    ],
+  },
+  {
+    id: 'ownerplus', title: 'Owner: value, home inspection and Ask GridKya', blurb: 'What her unit is worth against the estate, a home inspection that spots a roof leak, and instant answers.',
     devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
     reset: true,
     chapters: [
@@ -798,7 +847,7 @@ const STORIES = [
     ],
   },
   {
-    id: 'debitorder', title: 'NEW · Debit order and extra charges', blurb: 'The owner sends the signed debit order form; the agent activates it, raises a charge, and it all shows on the statement.',
+    id: 'debitorder', title: 'Debit order and extra charges', blurb: 'The owner sends the signed debit order form; the agent activates it, raises a charge, and it all shows on the statement.',
     devices: [{ id: 'ph', role: 'owner' }, { id: 'lap', role: 'agent' }],
     reset: true,
     chapters: [

@@ -2,6 +2,7 @@
   "project": "GridKya",
   "intro": "GridKya is being built one role at a time. Each role is finished, tested and shown here before the next one starts.",
   "roles": [
+    { "id": "platform", "label": "GridKya Administrator (dréCAR)", "status": "ready", "note": "Built and tested – opens and suspends agencies, accounts, subscriptions, system settings and the roles guide", "story": "admin" },
     { "id": "owner", "label": "Owner", "status": "ready", "note": "Built and tested – levies, statements, tenants, property value, home inspection and Ask GridKya", "story": "ownerplus" },
     { "id": "agent", "label": "Managing Agent", "status": "building", "note": "Levies & Payments done (bank statement import and allocation) – rest coming next", "story": "wrongref" },
     { "id": "estate", "label": "Estate Agent", "status": "planned", "note": "Early demo version – will be rebuilt" },
@@ -10,6 +11,21 @@
     { "id": "contractor", "label": "Contractor", "status": "planned", "note": "Early demo version – will be rebuilt" }
   ],
   "updates": [
+    {
+      "date": "2026-11-25",
+      "title": "Roles made clear, and the GridKya Administrator (dréCAR)",
+      "items": [
+        "New GridKya Administrator role for dréCAR – separate from the managing agent, who is a customer that manages complexes",
+        "One clear chain of access: dréCAR opens each managing agency and its first managing agent; the agency adds everyone else",
+        "Invite only: a cellphone number that nobody added gets no PIN – nobody can sign themselves up or pick their own role",
+        "With a real account you only see your own role (a trustee who owns a unit also gets Owner)",
+        "Administrator console: open agencies (free trial or paying), add managing agents, suspend and reactivate, block a person’s sign-in, subscriptions per unit and an activity log",
+        "“Who does what” guide on the sign-in screen: every role, what it may do and who gives it access",
+        "System settings (server, SMS, AI) are now dréCAR only; agencies keep their own bank details",
+        "Privacy: dréCAR cannot see levy accounts or residents unless the agency allows support access for 7 days",
+        "The same rules are enforced on the server, so no app change can get around them"
+      ]
+    },
     {
       "date": "2026-11-25",
       "title": "GridKya server built – ready to run on our own server",
